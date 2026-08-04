@@ -1,0 +1,8 @@
+{
+    "version": "1.0.1",
+    "publish_date": "2026-08-04",
+    "file_size": "66 KB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/release/TidyUUUUp.zip",
+    "force_update": false,
+    "changelog": "🐛 v1.0.1 修复优化版\n\n🛠️ 修复与优化：\n- 去除自动更新弹窗打扰，改为静默后台检查（仅手动检查才弹窗）\n- 优化文件分类准确度，解决图片与娱乐区域分类冲突问题\n- 新增更多关键词识别（screenshot/截图/演唱会等）\n- 优化分类路径关键词匹配范围\n\n📝 说明：\n- 软件启动后 3 秒自动后台检查更新\n- 发现更新只显示温和的 Toast 提示，不弹窗打扰\n- 需要更新时，右键托盘图标 → 检查更新 即可看到完整更新界面"
+}
