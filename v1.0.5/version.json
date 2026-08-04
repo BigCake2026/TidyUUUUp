@@ -1,0 +1,8 @@
+{
+    "version": "1.0.5",
+    "publish_date": "2026-08-04",
+    "file_size": "58 KB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.5/TidyUUUUp_v1.0.5.zip",
+    "force_update": false,
+    "changelog": "⌨️ v1.0.5 Quick Look + 固定常用软件\n\n✨ 本次更新：\n\n【空格键秒级预览 (Quick Look 增强版)】\n- 对标 macOS 的空格键预览，但比它更强大\n- 选中文件后按空格键，原地弹出预览浮窗，再按空格关闭\n- 支持图片、文档、代码等快速预览\n- 预览窗集成智能标签 + AI 分类置信度，一目了然\n- 光标悬停选中文件即可查看内容\n\n【Dock 栏固定常用软件】\n- 点击 ➕ 按钮可以添加常用软件/快捷方式\n- 智能检测系统常用软件（Chrome、Edge、VS Code、微信、QQ、钉钉等）一键固定\n- 支持浏览添加任意 .exe 程序或 .lnk 快捷方式\n- 支持手动添加快捷方式（自定义名称和路径\n- 右键固定项可「取消固定」\n- 所有固定项自动保存，重启软件后依然保留\n\n📝 使用方法：\n1. 空格键预览：在文件列表中选中文件，按空格键快速预览，再按空格关闭\n2. 固定软件：点击 Dock 栏 ➕ 按钮，选择要固定的常用软件"
+}
