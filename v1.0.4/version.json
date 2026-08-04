@@ -1,0 +1,8 @@
+{
+    "version": "1.0.4",
+    "publish_date": "2026-08-04",
+    "file_size": "52 KB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.4/TidyUUUUp_v1.0.4.zip",
+    "force_update": false,
+    "changelog": "↩️ v1.0.4 智能撤销站\n\n✨ 本次更新：\n- 新增「智能撤销站」：再也不怕整理错文件了！\n- Dock 栏新增撤销按钮（带小红点提示），点击查看最近10次整理\n- 支持单次文件移动撤销和批量桌面整理撤销\n- 撤销记录自动保存，软件重启后仍可查看历史\n- 恢复文件时自动处理重名冲突，不会覆盖已有文件\n- 小红点实时显示可撤销记录数量，一目了然\n\n📝 使用方法：\n1. 整理桌面或监控到新文件后，Dock栏撤销按钮会出现红点\n2. 点击撤销按钮，弹出最近10次整理记录\n3. 点击任意记录的「撤销」按钮，文件将自动移回原位"
+}
