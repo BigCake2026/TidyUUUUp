@@ -23,7 +23,7 @@ CURRENT_VERSION = "1.0.3"
 #   - GitHub Raw: https://raw.githubusercontent.com/你的用户名/仓库/main/version.json
 #   - Gitee Raw:  https://gitee.com/你的用户名/仓库/raw/main/version.json
 #   - 你的服务器: https://你的域名/version.json
-VERSION_CHECK_URL = "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/version.json"
+VERSION_CHECK_URL = "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.3/version.json"
 
 # ==================================================
 

@@ -1,8 +1,0 @@
-{
-    "version": "1.0.3",
-    "publish_date": "2026-08-04",
-    "file_size": "48 KB",
-    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/versions/v1.0.3/TidyUUUUp_v1.0.3.zip",
-    "force_update": false,
-    "changelog": "📦 v1.0.3 EXE打包版\n\n✨ 本次更新：\n- 新增「一键EXE打包工具」：双击即可把程序打包成单个EXE，不泄露任何源码\n- 新增版本归档目录 versions/，每个版本独立存放\n- 自动更新系统升级：同时支持EXE版本和源码版本自动更新\n- 每个版本都发布在GitHub，可随时回滚到历史版本\n\n📝 EXE打包方法：\n1. 在Windows电脑上下载源码\n2. 双击「打包成EXE.bat」\n3. 等待自动完成，生成的TidyUUUUp.exe就是无源码的程序"
-}
