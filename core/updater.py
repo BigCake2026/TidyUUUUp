@@ -16,7 +16,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, QObject
 # ==================== 配置区域 ====================
 
 # 当前版本号（发版时更新这里）
-CURRENT_VERSION = "1.0.1"
+CURRENT_VERSION = "1.0.2"
 
 # 版本信息文件地址（你发布新版本的地方）
 # 你可以把 version.json 放到任何能直接访问的地方：

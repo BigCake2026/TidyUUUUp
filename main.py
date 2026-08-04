@@ -29,7 +29,6 @@ from ui.zone_panel import ZonePanel, ZoneFolderButton
 
 from core.smart_engine import SmartRuleEngine
 from core.desktop_watcher import DesktopWatcher
-from core.subscription import SubscriptionManager
 from core.updater import UpdateChecker, CURRENT_VERSION
 
 
@@ -71,7 +70,6 @@ class TidyUUUUpApp:
 
         # 核心模块
         self.smart_engine = SmartRuleEngine()
-        self.subscription = SubscriptionManager()
 
         # 窗口
         self.main_window = MainWindow()
