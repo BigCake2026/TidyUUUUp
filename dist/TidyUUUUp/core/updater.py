@@ -128,38 +128,45 @@ class UpdateDownloader(QThread):
 
 
 def apply_update(update_file, app_dir):
-    """应用更新（解压新文件覆盖旧文件）"""
+    """应用更新（支持EXE版本和源码版本）"""
     try:
         import zipfile
 
         if not os.path.exists(update_file):
             return False, "更新文件不存在"
 
+        # 判断当前是EXE模式还是源码模式
+        is_exe_mode = getattr(sys, 'frozen', False)
+
         # 创建备份目录
         backup_dir = os.path.join(app_dir, f"_backup_{CURRENT_VERSION}")
         if os.path.exists(backup_dir):
             shutil.rmtree(backup_dir, ignore_errors=True)
 
-        # 备份当前版本（排除备份目录本身）
-        os.makedirs(backup_dir, exist_ok=True)
-        for item in os.listdir(app_dir):
-            src = os.path.join(app_dir, item)
-            dst = os.path.join(backup_dir, item)
-            if item.startswith('_backup') or item == backup_dir:
-                continue
-            if os.path.isdir(src):
-                shutil.copytree(src, dst, dirs_exist_ok=True)
-            else:
-                shutil.copy2(src, dst)
+        if not is_exe_mode:
+            # ========== 源码模式：备份所有文件 ==========
+            os.makedirs(backup_dir, exist_ok=True)
+            for item in os.listdir(app_dir):
+                src = os.path.join(app_dir, item)
+                dst = os.path.join(backup_dir, item)
+                if item.startswith('_backup') or item == backup_dir:
+                    continue
+                if os.path.isdir(src):
+                    shutil.copytree(src, dst, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(src, dst)
 
         # 解压更新文件
         with zipfile.ZipFile(update_file, 'r') as zf:
             # 检查zip内容，找到正确的目录
             root_dirs = set()
+            has_exe = False
             for name in zf.namelist():
                 parts = name.split('/')
                 if len(parts) > 1:
                     root_dirs.add(parts[0])
+                if name.lower().endswith('.exe'):
+                    has_exe = True
 
             # 如果zip里有一个根目录，用它作为基准
             if len(root_dirs) == 1:
@@ -182,7 +189,10 @@ def apply_update(update_file, app_dir):
                         with zf.open(member) as src, open(full_path, 'wb') as dst:
                             dst.write(src.read())
 
-        return True, "更新成功，请重启软件"
+        if is_exe_mode and has_exe:
+            return True, "更新成功，请重启软件（EXE已自动替换）"
+        else:
+            return True, "更新成功，请重启软件"
 
     except Exception as e:
         return False, f"更新失败: {e}"
