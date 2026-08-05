@@ -1,0 +1,38 @@
+
+This file lists modules PyInstaller was not able to find. This does not
+necessarily mean these modules are required for running your program. Both
+Python's standard library and 3rd-party Python packages often conditionally
+import optional modules, some of which may be available only on certain
+platforms.
+
+Types of import:
+* top-level: imported at the top-level - look at these first
+* conditional: imported within an if-statement
+* delayed: imported within a function
+* optional: imported within a try-except-statement
+
+IMPORTANT: Do NOT post this list to the issue-tracker. Use it as a basis for
+            tracking down the missing module yourself. Thanks!
+
+missing module named 'collections.abc' - imported by tracemalloc (top-level), typing (top-level), traceback (top-level), _colorize (top-level), selectors (top-level), logging (top-level), http.client (top-level), importlib.resources.readers (top-level), inspect (top-level)
+missing module named winreg - imported by importlib._bootstrap_external (conditional), mimetypes (optional), urllib.request (delayed, conditional, optional), platform (delayed, optional), core.system_integration (delayed, conditional, optional)
+missing module named _scproxy - imported by urllib.request (conditional)
+missing module named _winapi - imported by ntpath (optional), subprocess (conditional), shutil (conditional), pathlib._os (optional), mimetypes (optional), sysconfig (delayed)
+missing module named nt - imported by _colorize (delayed, conditional, optional), os (delayed, conditional, optional), ntpath (optional), shutil (conditional), importlib._bootstrap_external (conditional), ctypes (delayed, conditional)
+missing module named _frozen_importlib_external - imported by importlib._bootstrap (delayed), importlib (optional), importlib.abc (optional)
+excluded module named _frozen_importlib - imported by importlib (optional), importlib.abc (optional)
+missing module named 'PyQt5.QtCore' - imported by ui.dock_bar (top-level), ui.animations (top-level), ui.undo_panel (top-level), ui.main_window (top-level), core.file_index (top-level), core.file_organizer (top-level), ui.floating_ball (top-level), ui.zone_panel (top-level), core.desktop_watcher (top-level), core.undo_manager (top-level), ui.quick_look (top-level), core.updater (top-level), ui.update_dialog (top-level), /workspace/TidyUUUUpCode/v1.0.7/main.py (delayed)
+missing module named msvcrt - imported by subprocess (optional)
+missing module named win32com - imported by core.system_integration (delayed, optional)
+missing module named pythoncom - imported by core.system_integration (delayed, optional)
+missing module named vms_lib - imported by platform (delayed, optional)
+missing module named 'java.lang' - imported by platform (delayed, optional)
+missing module named java - imported by platform (delayed)
+missing module named _wmi - imported by platform (optional)
+missing module named 'watchdog.events' - imported by core.file_index (top-level), core.desktop_watcher (top-level)
+missing module named 'watchdog.observers' - imported by core.desktop_watcher (top-level)
+missing module named send2trash - imported by core.file_organizer (top-level)
+missing module named watchdog - imported by core.file_index (top-level)
+missing module named 'PyQt5.QtGui' - imported by /workspace/TidyUUUUpCode/v1.0.7/main.py (top-level), ui.dock_bar (top-level), ui.undo_panel (top-level), ui.main_window (top-level), ui.floating_ball (top-level), ui.zone_panel (top-level), ui.quick_look (top-level), ui.update_dialog (top-level)
+missing module named 'PyQt5.QtWidgets' - imported by /workspace/TidyUUUUpCode/v1.0.7/main.py (top-level), ui.dock_bar (top-level), ui.animations (top-level), ui.undo_panel (top-level), ui.main_window (top-level), ui.floating_ball (top-level), ui.zone_panel (top-level), ui.quick_look (top-level), ui.update_dialog (top-level)
+missing module named PyQt5 - imported by /workspace/TidyUUUUpCode/v1.0.7/main.py (top-level)
