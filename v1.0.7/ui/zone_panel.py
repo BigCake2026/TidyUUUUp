@@ -224,7 +224,7 @@ class ZonePanel(QWidget):
         self.show()
 
     def _load_files(self, zone_name):
-        """加载某个分类下的文件"""
+        """加载某个分类下的文件（从桌面扫描，虚拟分类）"""
         self.file_list.clear()
 
         files = []
@@ -237,24 +237,26 @@ class ZonePanel(QWidget):
                 if zone == zone_name:
                     files.append(info)
         else:
-            # 从分类文件夹读取
+            # 直接从桌面扫描（虚拟分类模式）
             from core.desktop_watcher import DesktopWatcher
             watcher = DesktopWatcher(self.engine)
-            zone_path = watcher.get_zone_path(zone_name)
-            if os.path.exists(zone_path):
-                for filename in os.listdir(zone_path):
-                    filepath = os.path.join(zone_path, filename)
-                    if os.path.isfile(filepath):
-                        try:
-                            stat = os.stat(filepath)
-                            files.append({
-                                'name': filename,
-                                'path': filepath,
-                                'size': stat.st_size,
-                                'modified': stat.st_mtime,
-                            })
-                        except OSError:
-                            pass
+            desktop_path = watcher.desktop_path
+            if os.path.exists(desktop_path):
+                for filename in os.listdir(desktop_path):
+                    filepath = os.path.join(desktop_path, filename)
+                    if os.path.isfile(filepath) and not filename.startswith('.') and not filename.startswith('~$'):
+                        zone, _ = self.engine.classify(filepath)
+                        if zone == zone_name:
+                            try:
+                                stat = os.stat(filepath)
+                                files.append({
+                                    'name': filename,
+                                    'path': filepath,
+                                    'size': stat.st_size,
+                                    'modified': stat.st_mtime,
+                                })
+                            except OSError:
+                                pass
 
         # 按修改时间排序
         files.sort(key=lambda x: x.get('modified', 0), reverse=True)
@@ -280,18 +282,15 @@ class ZonePanel(QWidget):
                 pass
 
     def _on_open_folder(self):
-        if self.current_zone:
-            self.open_folder.emit(self.current_zone)
-            # 打开文件夹
-            from core.desktop_watcher import DesktopWatcher
-            watcher = DesktopWatcher(self.engine)
-            zone_path = watcher.get_zone_path(self.current_zone)
-            os.makedirs(zone_path, exist_ok=True)
-            try:
-                if sys.platform == 'win32':
-                    os.startfile(zone_path)
-            except Exception:
-                pass
+        # 虚拟模式下打开桌面（文件都在桌面上）
+        from core.desktop_watcher import DesktopWatcher
+        watcher = DesktopWatcher(self.engine)
+        open_path = watcher.desktop_path
+        try:
+            if sys.platform == 'win32':
+                os.startfile(open_path)
+        except Exception:
+            pass
 
     def paintEvent(self, event):
         painter = QPainter(self)

@@ -322,7 +322,7 @@ class TidyUUUUpApp:
     def _start_desktop_watcher(self):
         self.desktop_watcher.start()
         self.desktop_watcher.ensure_zone_folders()
-        self._show_toast("👀 桌面实时监控已启动，新文件将自动分类")
+        self._show_toast("👀 桌面实时监控已启动，新文件将自动虚拟分类")
 
     def _on_file_detected(self, filepath, zone):
         filename = os.path.basename(filepath)
@@ -332,7 +332,15 @@ class TidyUUUUpApp:
     def _on_organize_completed(self, results):
         total = results.get('total', 0)
         organized = results.get('organized', {})
-        msg = f"✅ 桌面整理完成！共处理 {total} 个文件\n"
+        is_virtual = results.get('virtual_mode', True)
+
+        if is_virtual:
+            msg = f"✅ 虚拟分类完成！共分类 {total} 个文件\n\n"
+            msg += "📁 点击 Dock 栏上的分类文件夹查看对应文件\n"
+            msg += "📌 桌面文件保持原样，未被移动\n\n"
+        else:
+            msg = f"✅ 桌面整理完成！共处理 {total} 个文件\n"
+
         for zone, files in organized.items():
             msg += f"  {zone}: {len(files)} 个\n"
         QMessageBox.information(self.main_window, "整理完成", msg)
@@ -341,15 +349,31 @@ class TidyUUUUpApp:
     def _organize_desktop(self):
         reply = QMessageBox.question(
             self.main_window, "整理桌面",
-            "是否将桌面上所有文件自动分类到对应的文件夹？\n\n"
-            "文件将被移动到 桌面/智能分类/ 目录下",
+            "是否对桌面上所有文件进行虚拟分类？\n\n"
+            "✅ 文件不会被移动，桌面保持原样\n"
+            "✅ 只在 Dock 栏上创建虚拟分类文件夹\n"
+            "✅ 点击虚拟文件夹可快速查看对应类型的文件",
             QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.Yes
         )
 
         if reply == QMessageBox.Yes:
-            self._show_toast("🔄 正在整理桌面...")
-            QTimer.singleShot(100, lambda: self.desktop_watcher.organize_all())
+            self._show_toast("🔄 正在虚拟分类桌面文件...")
+            QTimer.singleShot(100, self._do_virtual_organize)
+
+    def _do_virtual_organize(self):
+        """执行虚拟整理（只分类，不移动）"""
+        # 确保先扫描桌面文件
+        if self.main_window.file_index:
+            desktop_path = self.desktop_watcher.desktop_path
+            if os.path.exists(desktop_path):
+                self.main_window.file_index.scan_directory(desktop_path, recursive=False)
+
+        # 执行虚拟整理
+        results = self.desktop_watcher.organize_all()
+
+        # 更新分类文件计数
+        self._update_zone_file_counts()
 
     # ============ 悬浮球模式 ============
 

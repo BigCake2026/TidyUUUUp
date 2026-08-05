@@ -21,7 +21,7 @@ class DesktopWatcher(QObject):
     file_moved = pyqtSignal(str, str)      # old_path, new_path
     organize_completed = pyqtSignal(dict)
 
-    def __init__(self, smart_engine=None):
+    def __init__(self, smart_engine=None, virtual_mode=True):
         super().__init__()
         self.engine = smart_engine or SmartRuleEngine()
         self.undo_manager = UndoManager()
@@ -31,6 +31,7 @@ class DesktopWatcher(QObject):
         self._lock = threading.Lock()
         self._settle_time = 1.0  # 等待文件写入稳定的时间（秒）
         self._batch_move_map = {}  # 批量整理时的移动映射
+        self.virtual_mode = virtual_mode  # 虚拟整理模式：不移动文件，只做虚拟分类
 
         # 桌面路径
         self.desktop_path = self._get_desktop_path()
@@ -166,9 +167,14 @@ class DesktopWatcher(QObject):
     def _auto_organize(self, filepath, zone, record_undo=True):
         """
         自动将文件移动到对应分类文件夹
+        virtual_mode=True 时只做虚拟分类，不移动文件
         record_undo: 是否记录撤销日志（批量整理时先不单独记录，最后批量记录）
         返回: (原路径, 新路径) 如果成功，失败返回 None
         """
+        # 虚拟整理模式：不移动文件，只返回分类结果
+        if self.virtual_mode:
+            return None
+
         try:
             filename = os.path.basename(filepath)
 
@@ -208,7 +214,7 @@ class DesktopWatcher(QObject):
             return None
 
     def organize_all(self):
-        """整理桌面上所有现有的文件"""
+        """整理桌面上所有现有的文件（虚拟模式：只分类，不移动）"""
         if not os.path.exists(self.desktop_path):
             return
 
@@ -216,10 +222,11 @@ class DesktopWatcher(QObject):
             'total': 0,
             'organized': {},
             'skipped': 0,
-            'errors': []
+            'errors': [],
+            'virtual_mode': self.virtual_mode,
         }
 
-        batch_move_map = {}  # 批量整理的移动映射
+        batch_move_map = {}  # 批量整理的移动映射（虚拟模式下始终为空）
 
         try:
             for item in os.listdir(self.desktop_path):
@@ -249,11 +256,12 @@ class DesktopWatcher(QObject):
                         results['organized'][zone] = []
                     results['organized'][zone].append(filepath)
 
-                    # 自动归档（先不单独记录撤销，最后批量记录）
-                    move_result = self._auto_organize(filepath, zone, record_undo=False)
-                    if move_result:
-                        old_path, new_path = move_result
-                        batch_move_map[old_path] = new_path
+                    # 虚拟模式下不移动文件，只分类
+                    if not self.virtual_mode:
+                        move_result = self._auto_organize(filepath, zone, record_undo=False)
+                        if move_result:
+                            old_path, new_path = move_result
+                            batch_move_map[old_path] = new_path
 
                 except Exception as e:
                     results['errors'].append((filepath, str(e)))
@@ -261,7 +269,7 @@ class DesktopWatcher(QObject):
         except Exception as e:
             results['errors'].append(('system', str(e)))
 
-        # 批量记录撤销日志
+        # 批量记录撤销日志（虚拟模式下不记录）
         if batch_move_map:
             self.undo_manager.add_batch_record(batch_move_map, 'organize')
 
