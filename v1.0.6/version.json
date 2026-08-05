@@ -1,0 +1,8 @@
+{
+    "version": "1.0.6",
+    "publish_date": "2026-08-05",
+    "file_size": "62 KB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.6/TidyUUUUp_v1.0.6.zip",
+    "force_update": false,
+    "changelog": "💎 v1.0.6 Liquid Glass Pro 液态玻璃视觉升级\n\n✨ 本次更新：\n\n【Liquid Glass Pro 液态玻璃效果】\n- 全站视觉升级，基于 2025-26 顶级液态玻璃 UI 配方\n- 所有控件改用 qradialgradient 径向渐变（模拟玻璃曲面折射）\n- 新增 6 种玻璃主题预设：Dark / Light / Neon / Aurora / Dock / Panel\n- 新增 glass_widget.py 专业玻璃绘制模块（6层绘制管线）\n  · 第1层：外投影（模拟玻璃悬浮感）\n  · 第2层：玻璃主体背景（径向渐变）\n  · 第3层：顶部镜面光泽（Specular Sheen）\n  · 第4层：内边框透镜效果（Inner Rim）\n  · 第5层：整体细边框（1px hairline）\n  · 第6层：多层内阴影（玻璃厚度感）\n- Dock 栏、面板、卡片、按钮、滚动条、菜单全部升级玻璃质感\n\n【视觉优化】\n- 所有按钮悬停/按下状态都有玻璃高光反馈\n- 列表项、侧边栏、复选框、输入框全部玻璃化\n- 菜单、下拉框、进度条采用统一玻璃风格\n- 边框透明度、内阴影、高光全部精细调校\n\n参考设计来源：design.dev/tools/liquid-glass-generator/"
+}
