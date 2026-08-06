@@ -5,14 +5,14 @@
 import os
 from PyQt5.QtCore import (
     Qt, QPoint, QSize, QPropertyAnimation, QEasingCurve,
-    pyqtSignal, QTimer
+    pyqtSignal, QTimer, QRect
 )
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QListWidget, QListWidgetItem, QScrollArea, QFrame, QFileDialog
 )
 from PyQt5.QtGui import (
-    QPainter, QColor, QIcon, QPixmap, QFont, QCursor, QLinearGradient, QBrush
+    QPainter, QColor, QIcon, QPixmap, QFont, QCursor, QLinearGradient, QBrush, QPen
 )
 
 from core.smart_engine import SmartRuleEngine

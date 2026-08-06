@@ -76,22 +76,27 @@ class DockItem(QPushButton):
         QTimer.singleShot(150, lambda: self.launched.emit(self.app_path))
 
     def _bounce_click(self):
+        """Liquid Glass Q弹点击 - Apple 风格弹性回弹"""
         original_geo = self.geometry()
 
-        # 按下效果
+        # 按下效果 - 快速缩小
         anim1 = QPropertyAnimation(self, b"geometry")
-        anim1.setDuration(100)
+        anim1.setDuration(80)
+        expand = 4
         anim1.setStartValue(original_geo)
-        expand = 3
         anim1.setEndValue(original_geo.adjusted(-expand, -expand, expand, expand))
         anim1.setEasingCurve(QEasingCurve.OutQuad)
 
-        # 弹回效果
+        # 弹回效果 - Q弹回弹 (OutElastic)
         anim2 = QPropertyAnimation(self, b"geometry")
-        anim2.setDuration(200)
+        anim2.setDuration(350)
         anim2.setStartValue(original_geo.adjusted(-expand, -expand, expand, expand))
         anim2.setEndValue(original_geo)
-        anim2.setEasingCurve(QEasingCurve.OutBack)
+        # 使用弹性曲线模拟液态Q弹
+        curve = QEasingCurve(QEasingCurve.OutElastic)
+        curve.setAmplitude(1.5)
+        curve.setPeriod(0.35)
+        anim2.setEasingCurve(curve)
 
         from PyQt5.QtCore import QSequentialAnimationGroup
         group = QSequentialAnimationGroup(self)

@@ -1,32 +1,249 @@
+"""
+Liquid Glass Animation Engine
+基于苹果 Spring Physics + QEasingCurve 的高级动画引擎
+
+参考:
+- Apple Spring Animation (mass-spring-damper model)
+- MFW-PyQt6 LiquidGlassHeroCard (QTimer 补间)
+- QEasingCurve OutBounce / OutElastic
+"""
+
+import math
 from PyQt5.QtCore import (
     QPropertyAnimation, QEasingCurve, QTimer, QPoint, QSize, Qt,
-    QParallelAnimationGroup, QSequentialAnimationGroup
+    QParallelAnimationGroup, QSequentialAnimationGroup, pyqtProperty,
+    QPointF
 )
 from PyQt5.QtWidgets import QWidget, QGraphicsOpacityEffect
 
 
-class BounceAnimation:
-    """苹果风格的Q弹动画"""
+# ============================================================
+#  Spring Physics Engine - 苹果级弹簧物理动画
+# ============================================================
+
+class SpringAnimation:
+    """
+    基于真实弹簧-质量-阻尼物理模型的动画引擎
+    模拟 Apple iOS/macOS 的 spring(duration:bounce:) API
+
+    物理公式: F = -k*x - c*v  (胡克定律 + 粘性阻尼)
+    """
 
     @staticmethod
-    def spring_animation(target, property_name, start_value, end_value, duration=500):
-        """弹性动画 - 模拟弹簧效果"""
+    def create(target, property_name, start_value, end_value,
+               stiffness=200, damping=20, mass=1.0):
+        """
+        创建弹簧动画
+
+        参数:
+            stiffness: 弹簧刚度 (越大越Q弹, Apple默认200)
+            damping:   阻尼系数 (越小弹跳越多, Apple默认20)
+            mass:      质量 (越大越迟钝)
+        """
+        anim = QPropertyAnimation(target, property_name)
+        anim.setDuration(SpringAnimation._calculate_duration(
+            stiffness, damping, mass
+        ))
+        anim.setStartValue(start_value)
+        anim.setEndValue(end_value)
+
+        # 使用 OutElastic 模拟弹簧振荡
+        curve = QEasingCurve(QEasingCurve.OutElastic)
+        curve.setAmplitude(max(1.0, damping / 10.0))
+        curve.setPeriod(max(0.1, mass / (stiffness / 100)))
+        anim.setEasingCurve(curve)
+
+        return anim
+
+    @staticmethod
+    def create_bounce(target, property_name, start_value, end_value,
+                      bounce=0.5, duration=600):
+        """
+        创建Q弹动画 (类似 Apple spring(bounce:) API)
+
+        参数:
+            bounce: 弹跳系数 0.0=不弹 ~ 1.0=最大弹
+        """
         anim = QPropertyAnimation(target, property_name)
         anim.setDuration(duration)
         anim.setStartValue(start_value)
         anim.setEndValue(end_value)
-        anim.setEasingCurve(QEasingCurve.OutBack)
+
+        # bounce 越大用 OutBounce, 适中用 OutElastic
+        if bounce > 0.7:
+            curve = QEasingCurve(QEasingCurve.OutBounce)
+        elif bounce > 0.3:
+            curve = QEasingCurve(QEasingCurve.OutElastic)
+            curve.setAmplitude(bounce * 2.0)
+            curve.setPeriod(0.3 + (1.0 - bounce) * 0.3)
+        else:
+            curve = QEasingCurve(QEasingCurve.OutBack)
+            curve.setOvershoot(1.0 + bounce * 2.0)
+
+        anim.setEasingCurve(curve)
         return anim
 
     @staticmethod
-    def scale_in(widget, duration=400):
-        """缩放进入动画 - 从小到大弹入"""
+    def _calculate_duration(stiffness, damping, mass):
+        """根据弹簧参数计算自然动画时长"""
+        if damping <= 0:
+            return 2000
+        # 阻尼振动周期
+        omega = math.sqrt(stiffness / mass)
+        decay = damping / (2 * mass)
+        if decay >= omega:
+            # 过阻尼
+            return int(800 + 200 * mass / damping)
+        # 欠阻尼: 3个衰减周期后基本停止
+        period = 2 * math.pi / math.sqrt(omega * omega - decay * decay)
+        duration = period * 3 * 1000 / (2 * math.pi)
+        return min(max(int(duration), 300), 2000)
+
+
+# ============================================================
+#  Smooth Tween - 平滑插值动画 (参考 MFW-PyQt6)
+# ============================================================
+
+class SmoothTween:
+    """
+    QTimer 驱动的平滑插值动画
+    value += (target - value) * factor
+    比 QPropertyAnimation 更流畅, 适合实时跟随鼠标的场景
+    """
+
+    def __init__(self, callback, factor=0.15, fps=60):
+        """
+        参数:
+            callback: 每帧调用, 传入当前插值后的值
+            factor:   插值系数 (0.05=丝滑, 0.2=灵敏, 0.15=苹果默认)
+            fps:      帧率
+        """
+        self._callback = callback
+        self._factor = factor
+        self._timer = QTimer()
+        self._timer.setInterval(int(1000 / fps))
+        self._timer.timeout.connect(self._tick)
+
+        self._current = 0.0
+        self._target = 0.0
+        self._start = 0.0
+        self._running = False
+
+    @property
+    def current(self):
+        return self._current
+
+    @property
+    def target(self):
+        return self._target
+
+    def set_target(self, value, start_from_current=True):
+        self._target = value
+        if start_from_current:
+            self._start = self._current
+        else:
+            self._start = value
+            self._current = value
+        if not self._running:
+            self._timer.start()
+            self._running = True
+
+    def stop(self):
+        self._timer.stop()
+        self._running = False
+
+    def _tick(self):
+        diff = self._target - self._current
+        self._current += diff * self._factor
+
+        if abs(diff) < 0.005:
+            self._current = self._target
+            self._callback(self._current)
+            self.stop()
+        else:
+            self._callback(self._current)
+
+
+class SmoothPointTween:
+    """QPointF 版本的平滑插值, 用于鼠标跟随"""
+
+    def __init__(self, callback, factor=0.18, fps=60):
+        self._callback = callback
+        self._factor = factor
+        self._timer = QTimer()
+        self._timer.setInterval(int(1000 / fps))
+        self._timer.timeout.connect(self._tick)
+
+        self._current = QPointF(0.5, 0.5)
+        self._target = QPointF(0.5, 0.5)
+        self._running = False
+
+    @property
+    def current(self):
+        return self._current
+
+    def set_target(self, x, y):
+        self._target = QPointF(x, y)
+        if not self._running:
+            self._timer.start()
+            self._running = True
+
+    def stop(self):
+        self._timer.stop()
+        self._running = False
+
+    def _tick(self):
+        dx = self._target.x() - self._current.x()
+        dy = self._target.y() - self._current.y()
+        self._current = QPointF(
+            self._current.x() + dx * self._factor,
+            self._current.y() + dy * self._factor
+        )
+
+        if abs(dx) < 0.003 and abs(dy) < 0.003:
+            self._current = self._target
+            self._callback(self._current)
+            self.stop()
+        else:
+            self._callback(self._current)
+
+
+# ============================================================
+#  BounceAnimation - Q弹动画工具类 (升级版)
+# ============================================================
+
+class BounceAnimation:
+    """苹果风格 Liquid Glass Q弹动画"""
+
+    # 苹果标准弹簧参数预设
+    SPRING_SNAPPY = {'stiffness': 300, 'damping': 26, 'mass': 1.0}   # 快速Q弹
+    SPRING_SMOOTH = {'stiffness': 200, 'damping': 22, 'mass': 1.0}   # 平滑Q弹
+    SPRING_BOUNCY = {'stiffness': 150, 'damping': 12, 'mass': 1.0}   # 弹跳明显
+    SPRING_GENTLE = {'stiffness': 120, 'damping': 18, 'mass': 1.2}   # 柔和弹性
+
+    @staticmethod
+    def spring_animation(target, property_name, start_value, end_value, duration=500):
+        """弹性动画 - 苹果级弹簧效果"""
+        anim = SpringAnimation.create(
+            target, property_name, start_value, end_value,
+            **BounceAnimation.SPRING_SMOOTH
+        )
+        if duration:
+            anim.setDuration(duration)
+        return anim
+
+    @staticmethod
+    def scale_in(widget, duration=500):
+        """缩放进入动画 - Q弹弹入"""
         widget.setScale(0.0)
         anim = QPropertyAnimation(widget, b"scale")
         anim.setDuration(duration)
         anim.setStartValue(0.0)
         anim.setEndValue(1.0)
-        anim.setEasingCurve(QEasingCurve.OutBack)
+        # 使用 OutBack 带回弹的缩放
+        curve = QEasingCurve(QEasingCurve.OutBack)
+        curve.setOvershoot(1.2)
+        anim.setEasingCurve(curve)
         return anim
 
     @staticmethod
@@ -40,8 +257,8 @@ class BounceAnimation:
         return anim
 
     @staticmethod
-    def fade_in(widget, duration=300):
-        """淡入动画"""
+    def fade_in(widget, duration=350):
+        """淡入动画 - 带微弹"""
         effect = QGraphicsOpacityEffect(widget)
         widget.setGraphicsEffect(effect)
         anim = QPropertyAnimation(effect, b"opacity")
@@ -66,19 +283,22 @@ class BounceAnimation:
         return anim
 
     @staticmethod
-    def slide_in_up(widget, duration=400, offset=30):
-        """从下往上滑入"""
+    def slide_in_up(widget, duration=500, offset=30):
+        """从下往上滑入 - Q弹效果"""
         pos = widget.pos()
         widget.move(pos.x(), pos.y() + offset)
         anim = QPropertyAnimation(widget, b"pos")
         anim.setDuration(duration)
         anim.setStartValue(QPoint(pos.x(), pos.y() + offset))
         anim.setEndValue(pos)
-        anim.setEasingCurve(QEasingCurve.OutBack)
+        # 使用弹性曲线
+        curve = QEasingCurve(QEasingCurve.OutBack)
+        curve.setOvershoot(1.1)
+        anim.setEasingCurve(curve)
         return anim
 
     @staticmethod
-    def slide_in_down(widget, duration=400, offset=30):
+    def slide_in_down(widget, duration=500, offset=30):
         """从上往下滑入"""
         pos = widget.pos()
         widget.move(pos.x(), pos.y() - offset)
@@ -86,11 +306,13 @@ class BounceAnimation:
         anim.setDuration(duration)
         anim.setStartValue(QPoint(pos.x(), pos.y() - offset))
         anim.setEndValue(pos)
-        anim.setEasingCurve(QEasingCurve.OutBack)
+        curve = QEasingCurve(QEasingCurve.OutBack)
+        curve.setOvershoot(1.1)
+        anim.setEasingCurve(curve)
         return anim
 
     @staticmethod
-    def slide_in_left(widget, duration=400, offset=30):
+    def slide_in_left(widget, duration=500, offset=30):
         """从右往左滑入"""
         pos = widget.pos()
         widget.move(pos.x() + offset, pos.y())
@@ -98,39 +320,41 @@ class BounceAnimation:
         anim.setDuration(duration)
         anim.setStartValue(QPoint(pos.x() + offset, pos.y()))
         anim.setEndValue(pos)
-        anim.setEasingCurve(QEasingCurve.OutBack)
+        curve = QEasingCurve(QEasingCurve.OutBack)
+        curve.setOvershoot(1.1)
+        anim.setEasingCurve(curve)
         return anim
 
     @staticmethod
     def pulse(widget, duration=600):
-        """脉冲动画 - 轻微放大再缩小"""
+        """脉冲动画 - Q弹放大再缩小"""
         original_size = widget.size()
         original_pos = widget.pos()
 
         group = QSequentialAnimationGroup()
 
-        # 放大
+        # Q弹放大
         anim1 = QPropertyAnimation(widget, b"geometry")
-        anim1.setDuration(duration // 2)
-        expand = 4
+        anim1.setDuration(int(duration * 0.4))
+        expand = 5
         anim1.setStartValue(widget.geometry())
         anim1.setEndValue(widget.geometry().adjusted(-expand, -expand, expand, expand))
-        anim1.setEasingCurve(QEasingCurve.OutQuad)
+        anim1.setEasingCurve(QEasingCurve.OutBack)
         group.addAnimation(anim1)
 
-        # 缩小
+        # 弹性缩小
         anim2 = QPropertyAnimation(widget, b"geometry")
-        anim2.setDuration(duration // 2)
+        anim2.setDuration(int(duration * 0.6))
         anim2.setStartValue(widget.geometry().adjusted(-expand, -expand, expand, expand))
         anim2.setEndValue(widget.geometry())
-        anim2.setEasingCurve(QEasingCurve.InQuad)
+        anim2.setEasingCurve(QEasingCurve.OutBounce)
         group.addAnimation(anim2)
 
         return group
 
     @staticmethod
     def shake(widget, duration=500, intensity=5):
-        """抖动动画"""
+        """抖动动画 - Q弹左右晃"""
         pos = widget.pos()
         group = QSequentialAnimationGroup()
 
@@ -142,14 +366,14 @@ class BounceAnimation:
                 offset = 0
             anim.setStartValue(pos)
             anim.setEndValue(QPoint(pos.x() + offset, pos.y()))
-            anim.setEasingCurve(QEasingCurve.InOutQuad)
+            anim.setEasingCurve(QEasingCurve.OutElastic)
             group.addAnimation(anim)
 
         return group
 
     @staticmethod
-    def hover_scale(widget, scale_factor=1.08, duration=200):
-        """悬停放大效果"""
+    def hover_scale(widget, scale_factor=1.08, duration=250):
+        """悬停放大效果 - Q弹"""
         original_scale = 1.0
 
         def on_enter():
@@ -168,9 +392,31 @@ class BounceAnimation:
 
         return on_enter, on_leave
 
+    @staticmethod
+    def liquid_bounce(widget, amplitude=1.3, duration=600):
+        """
+        液态Q弹 - Apple Liquid Glass 风格的弹性回弹
+        模拟液滴落下的弹跳效果
+        """
+        anim = QPropertyAnimation(widget, b"geometry")
+        anim.setDuration(duration)
+
+        original = widget.geometry()
+        expand = int(8 * amplitude)
+        anim.setStartValue(original.adjusted(-expand, -expand, expand, expand))
+        anim.setEndValue(original)
+
+        curve = QEasingCurve(QEasingCurve.OutBounce)
+        anim.setEasingCurve(curve)
+        return anim
+
+
+# ============================================================
+#  ToastManager - 浮动提示 (升级弹性动画)
+# ============================================================
 
 class ToastManager:
-    """浮动提示管理"""
+    """浮动提示管理 - Liquid Glass 风格"""
 
     def __init__(self, parent):
         self.parent = parent
@@ -198,22 +444,25 @@ class ToastManager:
         y = parent_geo.bottom() - toast.height() - 80 - (len(self.toasts) * (toast.height() + 10))
         toast.move(x, y + 30)
 
-        # 淡入动画
+        # 淡入动画 - 带微弹
         effect = QGraphicsOpacityEffect(toast)
         toast.setGraphicsEffect(effect)
         effect.setOpacity(0.0)
 
         fade_in = QPropertyAnimation(effect, b"opacity")
-        fade_in.setDuration(300)
+        fade_in.setDuration(350)
         fade_in.setStartValue(0.0)
         fade_in.setEndValue(1.0)
         fade_in.setEasingCurve(QEasingCurve.OutCubic)
 
+        # 滑入 - Q弹效果
         slide = QPropertyAnimation(toast, b"pos")
-        slide.setDuration(400)
+        slide.setDuration(500)
         slide.setStartValue(QPoint(x, y + 30))
         slide.setEndValue(QPoint(x, y))
-        slide.setEasingCurve(QEasingCurve.OutBack)
+        curve = QEasingCurve(QEasingCurve.OutBack)
+        curve.setOvershoot(1.2)
+        slide.setEasingCurve(curve)
 
         toast.show()
         fade_in.start()
@@ -235,13 +484,15 @@ class ToastManager:
                 def delete_later():
                     toast.close()
                     toast.deleteLater()
-                    # 重新排列其他toast
+                    # 重新排列其他toast - Q弹
                     for i, t in enumerate(self.toasts):
                         ty = parent_geo.bottom() - t.height() - 80 - (i * (t.height() + 10))
                         anim = QPropertyAnimation(t, b"pos")
-                        anim.setDuration(300)
+                        anim.setDuration(400)
                         anim.setEndValue(QPoint(t.x(), ty))
-                        anim.setEasingCurve(QEasingCurve.OutBack)
+                        curve = QEasingCurve(QEasingCurve.OutBack)
+                        curve.setOvershoot(1.1)
+                        anim.setEasingCurve(curve)
                         anim.start()
 
                 QTimer.singleShot(250, delete_later)
@@ -249,15 +500,37 @@ class ToastManager:
         QTimer.singleShot(duration, remove_toast)
 
 
+# ============================================================
+#  DockMagnifyEffect - macOS 风格 Dock 放大 (Spring 物理升级)
+# ============================================================
+
 class DockMagnifyEffect:
-    """Dock栏放大效果 - 类似macOS"""
+    """
+    Dock栏放大效果 - 升级版 Spring Physics
+
+    改进:
+    1. 使用 SmoothTween 替代 QPropertyAnimation, 更流畅
+    2. 鼠标跟随有惯性, 不会跳变
+    3. 离开时弹性回弹
+    """
 
     def __init__(self, dock_widget, items, magnify_scale=1.5, radius=80):
         self.dock = dock_widget
         self.items = items
         self.magnify_scale = magnify_scale
         self.radius = radius
-        self.animations = {}
+
+        # 每个 item 一个 SmoothTween
+        self.tweens = {}
+        self.current_scales = {}
+
+        for item in items:
+            self.current_scales[item] = 1.0
+            self.tweens[item] = SmoothTween(
+                lambda val, it=item: self._apply_scale(it, val),
+                factor=0.20,  # 苹果级灵敏度
+                fps=60
+            )
 
     def update_magnification(self, mouse_pos):
         dock_center_y = self.dock.height() // 2
@@ -270,39 +543,52 @@ class DockMagnifyEffect:
             distance = abs(mouse_pos.x() - item_center.x())
 
             if distance < self.radius:
-                # 使用高斯分布计算放大倍数
+                # 使用余弦分布 - 比高斯更Q弹
+                ratio = distance / self.radius
+                # 苹果风格的放大曲线: 中间最大, 两侧平滑过渡
                 scale = 1.0 + (self.magnify_scale - 1.0) * (
-                    1.0 - (distance / self.radius) ** 2
+                    0.5 * (1 + math.cos(ratio * math.pi))
                 )
             else:
                 scale = 1.0
 
-            self._apply_scale(item, scale)
+            # 使用 SmoothTween 平滑过渡
+            self.tweens[item].set_target(scale)
 
-    def _apply_scale(self, item, target_scale):
-        if item in self.animations:
-            self.animations[item].stop()
-
-        anim = QPropertyAnimation(item, b"maximumSize")
-        anim.setDuration(150)
-
+    def _apply_scale(self, item, scale):
         base_size = item.property("baseSize")
         if base_size is None:
             base_size = item.size()
             item.setProperty("baseSize", base_size)
 
-        new_width = int(base_size.width() * target_scale)
-        new_height = int(base_size.height() * target_scale)
+        new_width = int(base_size.width() * scale)
+        new_height = int(base_size.height() * scale)
+        item.setMaximumSize(new_width, new_height)
 
-        anim.setStartValue(item.maximumSize())
-        anim.setEndValue(QSize(new_width, new_height))
-        anim.setEasingCurve(QEasingCurve.OutCubic)
-        anim.start()
-
-        self.animations[item] = anim
+        self.current_scales[item] = scale
 
     def reset(self):
+        """弹性回弹到原始大小"""
         for item in self.items:
-            base_size = item.property("baseSize")
-            if base_size:
-                item.setMaximumSize(base_size)
+            self.tweens[item].set_target(1.0)
+
+    def add_item(self, item):
+        """动态添加 item"""
+        if item not in self.tweens:
+            self.current_scales[item] = 1.0
+            self.tweens[item] = SmoothTween(
+                lambda val, it=item: self._apply_scale(it, val),
+                factor=0.20, fps=60
+            )
+            if item not in self.items:
+                self.items.append(item)
+
+    def remove_item(self, item):
+        """移除 item"""
+        if item in self.tweens:
+            self.tweens[item].stop()
+            del self.tweens[item]
+        if item in self.current_scales:
+            del self.current_scales[item]
+        if item in self.items:
+            self.items.remove(item)

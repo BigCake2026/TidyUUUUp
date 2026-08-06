@@ -17,7 +17,7 @@ import json
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from PyQt5.QtCore import Qt, QTimer, QPoint
+from PyQt5.QtCore import Qt, QTimer, QPoint, QObject
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor, QFont
 
@@ -64,8 +64,9 @@ def create_app_icon():
     return QIcon(pixmap)
 
 
-class TidyUUUUpApp:
+class TidyUUUUpApp(QObject):
     def __init__(self):
+        super().__init__()
         self.app = QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
         self.app.setApplicationName("TidyUUUUp")

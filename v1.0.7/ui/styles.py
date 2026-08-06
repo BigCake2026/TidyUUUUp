@@ -1,14 +1,16 @@
 """
-TidyUUUUp - Liquid Glass Pro 液态玻璃样式表 v1.0.6
-基于 2025-26 顶级液态玻璃 UI 配方
-参考: design.dev/tools/liquid-glass-generator/
+TidyUUUUp - Liquid Glass Pro 液态玻璃样式表 v1.0.7
+基于 2025-26 顶级液态玻璃 UI 配方 + Apple Liquid Glass 设计语言
+参考: design.dev/tools/liquid-glass-generator/, Apple HIG Liquid Glass
 
-核心设计原则:
+核心设计原则 (Apple Liquid Glass):
 1. 径向渐变背景（模拟玻璃曲面折射）
 2. 多层 box-shadow（内高光 + 内阴影 + 外投影）
 3. 1px hairline 边框（玻璃边缘）
 4. Specular Sheen 顶部镜面光泽
 5. Inner Rim 内边框透镜效果
+6. 悬停时玻璃透明度增强 (Adaptive Translucency)
+7. 按压时液态变形感 (Liquid Deformation)
 """
 
 LIQUID_GLASS_PRO_QSS = """
@@ -104,7 +106,7 @@ QMainWindow, QWidget {
 #DockItem {
     background: transparent;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 6px;
     color: white;
 }
@@ -114,20 +116,24 @@ QMainWindow, QWidget {
         cx: 0.5, cy: 0.0,
         radius: 1.5,
         fx: 0.5, fy: 0.0,
-        stop: 0.0 rgba(255, 255, 255, 60),
-        stop: 1.0 rgba(255, 255, 255, 25)
+        stop: 0.0 rgba(255, 255, 255, 75),
+        stop: 0.5 rgba(255, 255, 255, 40),
+        stop: 1.0 rgba(255, 255, 255, 22)
     );
-    border: 1px solid rgba(255, 255, 255, 50);
+    border: 1px solid rgba(255, 255, 255, 80);
 }
 
 #DockItem:pressed {
     background: qradialgradient(
-        cx: 0.5, cy: 0.3,
-        radius: 1.5,
-        fx: 0.5, fy: 0.3,
-        stop: 0.0 rgba(255, 255, 255, 100),
-        stop: 1.0 rgba(255, 255, 255, 40)
+        cx: 0.5, cy: 0.5,
+        radius: 1.2,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(100, 150, 255, 130),
+        stop: 0.6 rgba(100, 150, 255, 70),
+        stop: 1.0 rgba(255, 255, 255, 30)
     );
+    border: 1px solid rgba(100, 150, 255, 100);
+    padding: 8px 4px 4px 8px;
 }
 
 /* ============================================================
@@ -162,13 +168,110 @@ QMainWindow, QWidget {
 
 #SystemButton:pressed {
     background: qradialgradient(
-        cx: 0.5, cy: 0.3,
-        radius: 1.5,
-        fx: 0.5, fy: 0.3,
-        stop: 0.0 rgba(100, 150, 255, 120),
-        stop: 1.0 rgba(100, 150, 255, 50)
+        cx: 0.5, cy: 0.5,
+        radius: 1.3,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(100, 150, 255, 140),
+        stop: 0.6 rgba(100, 150, 255, 75),
+        stop: 1.0 rgba(100, 150, 255, 40)
     );
-    border: 1px solid rgba(100, 150, 255, 150);
+    border: 1px solid rgba(100, 150, 255, 130);
+    padding: 10px 6px 6px 10px;
+}
+
+/* ============================================================
+   撤销按钮 - Liquid Glass 特殊样式
+   ============================================================ */
+
+#UndoButton {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(255, 200, 100, 50),
+        stop: 1.0 rgba(255, 200, 100, 20)
+    );
+    border: 1px solid rgba(255, 200, 100, 60);
+    border-radius: 16px;
+    padding: 6px;
+    color: white;
+}
+
+#UndoButton:hover {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(255, 200, 100, 90),
+        stop: 1.0 rgba(255, 200, 100, 40)
+    );
+    border: 1px solid rgba(255, 200, 100, 120);
+}
+
+#UndoButton:pressed {
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5,
+        radius: 1.3,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(255, 180, 80, 150),
+        stop: 1.0 rgba(255, 180, 80, 50)
+    );
+    padding: 8px 4px 4px 8px;
+}
+
+/* 小红点提示 (撤销记录) */
+#UndoBadge {
+    background: qradialgradient(
+        cx: 0.3, cy: 0.3,
+        radius: 1.0,
+        fx: 0.3, fy: 0.3,
+        stop: 0.0 rgba(255, 100, 100, 255),
+        stop: 1.0 rgba(220, 50, 50, 255)
+    );
+    border: 1.5px solid rgba(255, 255, 255, 200);
+    border-radius: 9px;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* ============================================================
+   开始按钮 - Windows 徽标
+   ============================================================ */
+
+#StartButton {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(0, 120, 215, 80),
+        stop: 1.0 rgba(0, 180, 255, 30)
+    );
+    border: 1px solid rgba(0, 180, 255, 80);
+    border-radius: 16px;
+    padding: 6px;
+}
+
+#StartButton:hover {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(0, 150, 255, 130),
+        stop: 1.0 rgba(0, 200, 255, 50)
+    );
+    border: 1px solid rgba(0, 200, 255, 130);
+}
+
+#StartButton:pressed {
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5,
+        radius: 1.3,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(0, 100, 200, 150),
+        stop: 1.0 rgba(0, 150, 255, 50)
+    );
+    padding: 8px 4px 4px 8px;
 }
 
 /* ============================================================
@@ -237,12 +340,15 @@ QPushButton:hover {
 
 QPushButton:pressed {
     background: qradialgradient(
-        cx: 0.5, cy: 0.3,
-        radius: 1.5,
-        fx: 0.5, fy: 0.3,
-        stop: 0.0 rgba(80, 130, 235, 150),
-        stop: 1.0 rgba(80, 130, 235, 80)
+        cx: 0.5, cy: 0.5,
+        radius: 1.3,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(80, 130, 235, 170),
+        stop: 0.6 rgba(80, 130, 235, 100),
+        stop: 1.0 rgba(80, 130, 235, 50)
     );
+    border: 1px solid rgba(80, 130, 235, 150);
+    padding: 12px 22px 8px 26px;
 }
 
 QPushButton:disabled {
@@ -694,6 +800,185 @@ QMenu::separator {
     height: 1px;
     background: rgba(255, 255, 255, 15);
     margin: 6px 12px;
+}
+
+/* ============================================================
+   Quick Look 预览面板 - Apple 风格
+   ============================================================ */
+
+#QuickLookPanel {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 2.0,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(40, 40, 60, 235),
+        stop: 0.5 rgba(25, 25, 45, 225),
+        stop: 1.0 rgba(15, 15, 35, 215)
+    );
+    border: 1px solid rgba(255, 255, 255, 70);
+    border-radius: 20px;
+    color: white;
+}
+
+#QuickLookImage {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 40);
+    border-radius: 12px;
+}
+
+#QuickLookInfo {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(255, 255, 255, 30),
+        stop: 1.0 rgba(255, 255, 255, 12)
+    );
+    border: 1px solid rgba(255, 255, 255, 50);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: white;
+}
+
+#ConfidenceBar {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.5,
+        radius: 2.0,
+        fx: 0.5, fy: -0.5,
+        stop: 0.0 rgba(255, 255, 255, 20),
+        stop: 1.0 rgba(255, 255, 255, 8)
+    );
+    border: 1px solid rgba(255, 255, 255, 30);
+    border-radius: 6px;
+    height: 8px;
+}
+
+#ConfidenceChunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0.0 rgba(100, 200, 255, 230),
+        stop:0.5 rgba(150, 120, 255, 230),
+        stop:1.0 rgba(255, 150, 200, 230)
+    );
+    border-radius: 6px;
+}
+
+/* ============================================================
+   虚拟文件夹 - Dock 栏分类
+   ============================================================ */
+
+#VirtualFolder {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(255, 200, 100, 60),
+        stop: 1.0 rgba(255, 150, 80, 25)
+    );
+    border: 1px solid rgba(255, 200, 100, 70);
+    border-radius: 14px;
+    padding: 6px;
+}
+
+#VirtualFolder:hover {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(255, 200, 100, 100),
+        stop: 1.0 rgba(255, 150, 80, 40)
+    );
+    border: 1px solid rgba(255, 200, 100, 130);
+}
+
+#VirtualFolder:pressed {
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5,
+        radius: 1.3,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(255, 180, 80, 140),
+        stop: 1.0 rgba(255, 150, 80, 50)
+    );
+    padding: 8px 4px 4px 8px;
+}
+
+/* ============================================================
+   Toast 提示 - Liquid Glass 浮动卡片
+   ============================================================ */
+
+#Toast {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(35, 35, 55, 240),
+        stop: 1.0 rgba(20, 20, 40, 230)
+    );
+    border: 1px solid rgba(255, 255, 255, 60);
+    border-radius: 12px;
+    padding: 12px 20px;
+    color: white;
+}
+
+/* ============================================================
+   撤销面板 - Liquid Glass 列表
+   ============================================================ */
+
+#UndoPanel {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 2.0,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(40, 40, 60, 240),
+        stop: 0.5 rgba(25, 25, 45, 230),
+        stop: 1.0 rgba(15, 15, 35, 220)
+    );
+    border: 1px solid rgba(255, 255, 255, 70);
+    border-radius: 18px;
+    color: white;
+}
+
+#UndoRecordItem {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(255, 255, 255, 25),
+        stop: 1.0 rgba(255, 255, 255, 10)
+    );
+    border: 1px solid rgba(255, 255, 255, 30);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: white;
+}
+
+#UndoRecordItem:hover {
+    background: qradialgradient(
+        cx: 0.5, cy: -0.3,
+        radius: 1.8,
+        fx: 0.5, fy: -0.3,
+        stop: 0.0 rgba(100, 150, 255, 70),
+        stop: 1.0 rgba(100, 150, 255, 30)
+    );
+    border: 1px solid rgba(100, 150, 255, 80);
+}
+
+#UndoRecordItem:pressed {
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5,
+        radius: 1.3,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 rgba(100, 150, 255, 120),
+        stop: 1.0 rgba(100, 150, 255, 40)
+    );
+}
+
+/* ============================================================
+   悬浮球 - Floating Ball (动态绘制为主)
+   ============================================================ */
+
+#FloatingBall {
+    background: transparent;
+    border: none;
 }
 """
 

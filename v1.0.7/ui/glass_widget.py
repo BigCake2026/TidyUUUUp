@@ -11,7 +11,7 @@ Liquid Glass 液态玻璃效果组件
 - 内边框（Inner Rim）玻璃边缘透镜效果
 """
 
-from PyQt5.QtCore import Qt, QRectF, QPointF
+from PyQt5.QtCore import Qt, QRectF, QPointF, QTimer
 from PyQt5.QtGui import (
     QPainter, QColor, QLinearGradient, QRadialGradient,
     QPainterPath, QPen, QBrush, QFont
@@ -334,3 +334,133 @@ def apply_glass_effect(widget, style='dark'):
         layout.insertWidget(0, glass)
         glass.lower()
     return glass
+
+
+class MouseReactiveGlassWidget(LiquidGlassWidget):
+    """
+    鼠标响应式液态玻璃 - Liquid Glass Pro
+
+    参考 MFW-PyQt6 LiquidGlassHeroCard:
+    - 鼠标移动时光晕跟随, 带 SmoothTween 惯性
+    - 悬停时玻璃边缘高亮增强
+    - 离开时光晕弹性消失
+
+    Apple Liquid Glass 特色:
+    - 光晕随鼠标平滑跟随 (factor=0.18)
+    - 玻璃折射感随悬停强度变化
+    - Q弹的光晕出现/消失
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setMouseTracking(True)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        # 鼠标跟随光晕状态
+        self._hover_strength = 0.0          # 当前悬停强度 (0.0~1.0)
+        self._target_hover = 0.0            # 目标悬停强度
+        self._glow_x = 0.5                  # 当前光晕X位置 (归一化 0~1)
+        self._glow_y = 0.45                 # 当前光晕Y位置
+        self._target_glow_x = 0.5           # 目标光晕X
+        self._target_glow_y = 0.45          # 目标光晕Y
+
+        # 60fps 平滑动画定时器
+        self._anim_timer = QTimer(self)
+        self._anim_timer.setInterval(16)    # ~60fps
+        self._anim_timer.timeout.connect(self._tick_liquid)
+
+    def _tick_liquid(self):
+        """平滑插值动画 - 苹果级惯性"""
+        # 悬停强度插值 (factor=0.18 苹果默认)
+        self._hover_strength += (self._target_hover - self._hover_strength) * 0.18
+
+        # 光晕位置插值 (factor=0.15 更丝滑)
+        self._glow_x += (self._target_glow_x - self._glow_x) * 0.15
+        self._glow_y += (self._target_glow_y - self._glow_y) * 0.15
+
+        # 收敛检测
+        if (abs(self._hover_strength - self._target_hover) < 0.005 and
+            abs(self._glow_x - self._target_glow_x) < 0.003 and
+            abs(self._glow_y - self._target_glow_y) < 0.003):
+            self._hover_strength = self._target_hover
+            self._glow_x = self._target_glow_x
+            self._glow_y = self._target_glow_y
+            self._anim_timer.stop()
+
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        w = max(self.width(), 1)
+        h = max(self.height(), 1)
+        self._target_glow_x = event.pos().x() / w
+        self._target_glow_y = event.pos().y() / h
+        self._target_hover = 1.0
+        if not self._anim_timer.isActive():
+            self._anim_timer.start()
+        super().mouseMoveEvent(event)
+
+    def enterEvent(self, event):
+        self._target_hover = 1.0
+        if not self._anim_timer.isActive():
+            self._anim_timer.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._target_hover = 0.0
+        if not self._anim_timer.isActive():
+            self._anim_timer.start()
+        super().leaveEvent(event)
+
+    def paintEvent(self, event):
+        # 先绘制父类的标准玻璃效果
+        super().paintEvent(event)
+
+        # 如果有悬停强度, 绘制鼠标跟随光晕
+        if self._hover_strength > 0.01:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.Antialiasing, True)
+
+            rect = self.rect()
+            w = rect.width()
+            h = rect.height()
+            r = self._border_radius
+
+            path = QPainterPath()
+            path.addRoundedRect(QRectF(rect), r, r)
+            painter.setClipPath(path)
+
+            # 鼠标跟随光晕 - 液态玻璃折射感
+            glow_cx = self._glow_x * w
+            glow_cy = self._glow_y * h
+            glow_radius = min(w, h) * 0.6
+
+            glow_grad = QRadialGradient(
+                QPointF(glow_cx, glow_cy),
+                glow_radius
+            )
+
+            # 光晕颜色随悬停强度变化
+            alpha1 = int(60 * self._hover_strength)
+            alpha2 = int(30 * self._hover_strength)
+            alpha3 = int(10 * self._hover_strength)
+
+            glow_grad.setColorAt(0.0, QColor(255, 255, 255, alpha1))
+            glow_grad.setColorAt(0.3, QColor(200, 220, 255, alpha2))
+            glow_grad.setColorAt(0.7, QColor(150, 180, 255, alpha3))
+            glow_grad.setColorAt(1.0, QColor(0, 0, 0, 0))
+
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QBrush(glow_grad))
+            painter.drawRoundedRect(QRectF(rect), r, r)
+
+            # 边缘高亮增强 - 悬停时边框更亮
+            if self._hover_strength > 0.3:
+                edge_alpha = int(50 * self._hover_strength)
+                painter.setPen(QPen(QColor(255, 255, 255, edge_alpha), 2))
+                painter.setBrush(Qt.NoBrush)
+                painter.drawRoundedRect(
+                    QRectF(1, 1, w - 2, h - 2),
+                    r - 1, r - 1
+                )
+
+            painter.end()

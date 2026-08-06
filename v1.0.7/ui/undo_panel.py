@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
     QListWidget, QListWidgetItem, QFrame, QMessageBox
 )
 from PyQt5.QtGui import (
-    QPainter, QColor, QIcon, QPixmap, QFont, QCursor, QLinearGradient, QBrush
+    QPainter, QColor, QIcon, QPixmap, QFont, QCursor, QLinearGradient, QBrush, QPen
 )
 
 
