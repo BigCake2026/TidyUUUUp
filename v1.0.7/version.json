@@ -1,0 +1,8 @@
+{
+    "version": "1.0.7",
+    "publish_date": "2026-08-05",
+    "file_size": "65 KB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.7/TidyUUUUp_v1.0.7.zip",
+    "force_update": false,
+    "changelog": "📌 v1.0.7 虚拟整理模式 + 桌面快捷方式 + 开机自启\n\n✨ 本次更新：\n\n【虚拟整理模式（核心升级）】\n- 整理桌面时不再移动文件，桌面保持原样不动\n- 在 Dock 栏上创建虚拟分类文件夹（图片/文档/视频...）\n- 点击虚拟文件夹即可快速查看对应类型的桌面文件\n- 双击文件可直接打开，点击「打开文件夹」跳转到桌面\n- 新文件自动虚拟分类，实时更新分类文件计数\n- 保留物理整理模式（可通过代码切换 virtual_mode=False）\n\n【桌面快捷方式】\n- 首次运行自动在桌面创建 TidyUUUUp 快捷方式\n- 快捷方式使用自定义图标（resources/app_icon.ico）\n- 右键托盘图标 →「创建/删除桌面快捷方式」随时切换\n\n【开机自启】\n- 右键托盘图标 →「开机自动启动」一键启用\n- 通过启动文件夹快捷方式实现，无需修改注册表\n- 右键托盘图标 →「禁用开机自启」随时关闭\n\n【系统集成模块】\n- 新增 core/system_integration.py\n- 支持 Windows COM (pywin32) 和 PowerShell 两种方式创建快捷方式\n- 自动检测系统版本和可用工具\n\n【资源文件】\n- 新增 resources/ 目录，包含 app_icon.ico（6种尺寸）"
+}
