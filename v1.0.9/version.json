@@ -1,0 +1,8 @@
+{
+    "version": "1.0.9",
+    "publish_date": "2026-08-08",
+    "file_size": "66 MB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.9/TidyUUUUp_v1.0.9_Linux.tar.gz",
+    "force_update": false,
+    "changelog": "🎨 v1.0.9 全面 Apple 风格重构 — 告别复古深色，拥抱 macOS Sonoma 浅色磨砂玻璃\n\n🚀 本次重磅更新（2026-08-08）：\n\n【全局 Apple 风格重构（8 个文件 / 100+ 处修改）】\n- 全局 QSS 从深色复古风格彻底重写为 Apple HIG 浅色磨砂玻璃\n- 三层毛玻璃深度：LiquidGlassPro (22px) / LiquidGlassPanel (16px) / LiquidGlassCard (12px)\n- Apple 官方色系：蓝 #0A84FF / 红 #FF3B30 / 绿 #30D158 / 橙 #FF9F0A / 紫 #BF5AF2\n- 文字色：主 #1D1D1F / 二级 #6E6E73 / 三级 #3C3C43（Apple 官方前景色）\n- 悬停反馈不发光，只加强对比度（Accent 色 12~18% Alpha 叠加）\n- 统一圆角三档：列表 9~10 / 按钮 10~12 / 容器面板 16~22\n\n【ZoneFolderButton — macOS Finder 风格文件夹图标】\n- 从深色渐变改为浅色磨砂玻璃效果\n- 三色渐变主体：顶白→中 tint→底稍深 tint\n- 1px 顶部高光线 + Apple 色系细描边\n- 角标采用 Apple 系统红色 #FF375F + 细白边\n\n【DockBar — 浅色半透明磨砂玻璃】\n- 背景从深紫色改为浅色半透明磨砂玻璃\n- 系统按钮采用 SF Symbols 风格设计\n- 应用图标：纯色磨砂圆角方块 + Apple 色系首字母\n\n【FloatingBall — Apple Siri 风格彩色发光晶体】\n- 从深色蓝紫渐变改为 Siri 风蓝白紫渐变晶体\n- 极柔和单色调光晕（蓝紫渐变）\n- 4 个对称彩色圆点（蓝/粉/紫/橙）+ 中心高光\n\n【DirectoryTreePopup — 浅色磨砂玻璃弹出面板】\n- 从深蓝背景改为浅磨砂玻璃 + 深色文字\n- 与 Apple 风格全局样式统一\n\n【5 张真实运行截图】\n- 01: 主窗口 + Dock + 悬浮球\n- 02: Dock 栏特写\n- 03: 悬停弹出目录树\n- 04: 悬浮球 + 文件夹图标状态\n- 05: 完整桌面大图"
+}
