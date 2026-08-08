@@ -75,8 +75,16 @@ pyinstaller ^
     --onefile ^
     --windowed ^
     --name "TidyUUUUp" ^
+    --icon "resources\app_icon.ico" ^
     --clean ^
     --noconfirm ^
+    --add-data "version.json;." ^
+    --add-data "resources;resources" ^
+    --hidden-import PyQt5 ^
+    --hidden-import watchdog ^
+    --hidden-import pynput ^
+    --hidden-import mss ^
+    --hidden-import send2trash ^
     main.py
 
 if %errorlevel% neq 0 (
