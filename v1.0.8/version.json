@@ -1,0 +1,8 @@
+{
+    "version": "1.0.9",
+    "publish_date": "2026-08-08",
+    "file_size": "35 MB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.8/TidyUUUUp_v1.0.8.zip",
+    "force_update": false,
+    "changelog": "🍎 v1.0.9 全面 Apple HIG 风格重构 — 告别复古深色，真正的 macOS 浅色磨砂玻璃\n\n🚀 本次重磅更新（2026-08-08）：\n\n【全面 Apple 浅色风格重构】\n- 彻底清除所有深色复古样式（深紫/深蓝底 + 白字），全面替换为 Apple HIG 浅色磨砂玻璃\n- 8 个 UI 文件、100+ 处样式修改，统一 Apple 官方色系和设计规范\n- 主文字 #1D1D1F / 次要文字 #6E6E73 / 三级文字 #3C3C43\n- 浅色毛玻璃背景 rgba(250,251,255,0.85~0.96) + 极淡灰蓝 hairline 边框\n- Accent 色系：Apple 蓝 #0A84FF / 红 #FF3B30 / 绿 #30D158 / 橙 #FF9F0A / 紫 #BF5AF2\n- 悬停反馈不发光，只加强对比度（Accent 色 12~18% Alpha 叠加）\n- 圆角三档统一：列表 9~10 / 按钮 10~12 / 容器面板 16~22\n\n【Finder 风格文件夹图标（重绘）】\n- ZoneFolderButton 改为 macOS Finder 风格：浅色磨砂主体 + 舌头一次成型\n- 三色渐变（顶白→中 tint→底稍深 tint），单层极细高光\n- Apple 标准色系描边 + 内描边双层\n- 红色角标采用 Apple 系统红 #FF3B30 + 细白边\n\n【Dock 栏 Apple 风格】\n- 背景改为 macOS Sonoma 浅磨砂玻璃（冷白渐变）\n- 系统按钮：浅色磨砂底 + 单层 emoji，不再多层阴影\n- 启动按钮：淡蓝玻璃底 + 简化 Apple 图标\n- 分隔符：柔和竖向渐隐线，不再发光\n\n【Siri 风格悬浮球】\n- 砍掉彩虹光晕，改为柔和蓝紫单色调光晕\n- 球体 Liquid Glass：蓝白紫渐变晶体效果\n- 极简 Siri 圆点图标（4 个对称彩色圆点）\n\n【弹出面板/菜单全面 Apple 化】\n- DirectoryTreePopup：浅色磨砂背景 + 深色文字\n- ZonePanel：浅色容器 + Apple 蓝按钮\n- UndoPanel：浅色背景 + Apple 橙风格撤销按钮\n- QuickLook：浅色预览容器 + Apple 风关闭按钮\n- MainWindow：浅色主界面 + Apple 风文件列表\n- 所有右键菜单（5处）：浅色磨砂 + Apple 蓝悬停\n- 添加快捷方式对话框：浅色表单 + Apple 风按钮\n\n【保留 v1.0.8 核心功能】\n- 鼠标悬停显示目录树弹出面板\n- Liquid Glass 3D 文件夹图标\n- 智能定时器管理 + 收敛检测\n- Spring 物理动画 + Q弹回弹\n- 动画对象生命周期防 GC 回收"
+}
