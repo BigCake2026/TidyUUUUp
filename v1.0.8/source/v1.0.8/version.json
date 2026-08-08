@@ -1,0 +1,8 @@
+{
+    "version": "1.0.8",
+    "publish_date": "2026-08-07",
+    "file_size": "35 MB",
+    "download_url": "https://raw.githubusercontent.com/BigCake2026/TidyUUUUp/main/v1.0.8/TidyUUUUp_v1.0.8.zip",
+    "force_update": false,
+    "changelog": "🎨 v1.0.8 Liquid Glass 3D 文件夹图标 + 悬停目录树弹出面板 + Dock 视觉全面翻新\n\n🚀 本次重磅更新（2026-08-07）：\n\n【Liquid Glass 3D 文件夹图标（全新绘制）】\n- 彻底重写 ZoneFolderButton.paintEvent：多段渐变上盖/盒身，营造 3D 立体纵深\n- 内阴影 + 外阴影双层叠加，Apple 风格折叠质感\n- 弧形高光线条，模拟玻璃表面反光\n- 按分类颜色自适应图标底板（图片🖼️/视频🎬/文档📄/代码💻…）\n- 真实文件数量徽标：右上角红色圆形气泡 + 白边描边，超 99 显示 99+\n- 悬停蓝色光晕浮起 + 按压凹陷 + 缩放动画（QPropertyAnimation 丝滑过渡）\n\n【鼠标悬停显示目录树弹出面板】\n- 新增 DirectoryTreePopup：Qt.Popup 透明背景独立窗口\n- Liquid Glass 外形：外发光底托 / 深蓝渐变主体 / 顶部镜面高光 / 底部内阴影 / 双层半透明描边\n- 底部中央三角箭头精确指向悬停的 Dock 图标\n- 自动按目录分组（📂 桌面 / 📂 下载 / …），每组最多 8 个 + \"还有 N 个更多…\" 提示\n- 空状态友好提示（📭 暂无文件）\n- 双击打开文件，跨平台兼容（startfile/open/xdg-open）\n- 智能自动隐藏：离开 ZoneFolderButton 280ms 倒计时、进入 popup 取消、离开 popup 再 380ms 淡出\n\n【Dock 栏整体视觉翻新】\n- 底部径向渐变软阴影底托，\"悬浮\" 于桌面之上\n- 三段式主体渐变：顶部亮蓝→中部深靛→底部深夜，告别纯色单调\n- macOS 风格顶部镜面高光：ClipRect 精准裁切 + 透明渐变覆盖\n- 底部 10px 区域内阴影，模拟玻璃容器折射\n- 双层半透明描边：外层 1.1px / 内层 0.6px，边缘圆润通透\n- 顶部 1.6px 白色高光线条，精致度拉满\n- 发光分隔符替换傻白细线：中间亮两头渐隐的竖向发光条（3 处分区）\n- contentMargins / spacing 精调，呼吸感更佳\n\n【继续保留 v1.0.7 优势】\n- Spring 物理动画 + SmoothTween 平滑插值（60fps 苹果级）\n- 智能定时器管理（收敛自动停止，省 CPU 不空转）\n- 单一共享 DockMagnifyEffect 定时器\n- 动画对象生命周期防 GC 回收\n- 搜索框 300ms 防抖 / 一次性 O(n) 分类计数 / 文件索引锁保护"
+}
