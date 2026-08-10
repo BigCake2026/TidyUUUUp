@@ -28,7 +28,7 @@ from PyQt5.QtGui import (
 )
 from PyQt5.QtWidgets import QApplication, QSplashScreen
 
-from ui.styles import apply_liquid_glass
+from ui.styles import apply_tidy_style
 from ui.dock_bar import DockBar
 from ui.main_window import MainWindow
 from ui.floating_ball import FloatingBall
@@ -234,7 +234,7 @@ def main():
     app.setApplicationName("TidyUUUUp")
     app.setFont(QFont("Noto Sans CJK SC", 10))
 
-    apply_liquid_glass(app)
+    apply_tidy_style(app)
     icon = create_app_icon()
     app.setWindowIcon(icon)
 
@@ -254,9 +254,9 @@ def main():
     dock = DockBar(screen)
     # Dock 需要几个假应用按钮
     default_apps = [
-        ("📁 文件",  "explorer"),
-        ("🌐 浏览器", "chrome"),
-        ("💬 聊天",  "wechat"),
+        ("文件",  "explorer"),
+        ("浏览器", "chrome"),
+        ("聊天",  "wechat"),
     ]
     for n, p in default_apps:
         dock.add_app(n, p)
@@ -393,14 +393,9 @@ def main():
         floating_ball.show()
         floating_ball.move(screen.width() // 2 - floating_ball.width() // 2,
                            screen.height() // 2 - floating_ball.height() // 2 - 200)
-        # 强制悬浮球进入 hover 状态（手动设属性 + 动画）
-        floating_ball._target_hover = 1.0
-        floating_ball._target_glow_x = 0.0
-        floating_ball._target_glow_y = -5.0
-        try:
-            floating_ball._liquid_timer.start()
-        except Exception:
-            pass
+        # 强制悬浮球进入 hover 状态（极简版：直接置 hover 标志 + 重绘）
+        floating_ball._is_hovered = True
+        floating_ball.update()
         time.sleep(0.02)
 
         # Dock 上依次展示 normal / hover / pressed；Zone 真实名带"区域"字样

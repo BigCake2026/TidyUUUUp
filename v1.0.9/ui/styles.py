@@ -1,20 +1,39 @@
 """
-TidyUUUUp - Apple 风格样式表 v1.0.8
-参考：Apple HIG, macOS Sonoma 控制中心 / Finder / Dock
+TidyUUUUp Design System v2.0
+参考 Apple HIG / macOS Sonoma 原生应用
 
-核心设计原则 (Apple Light):
-1. 浅色 / 极淡的冷色调磨砂玻璃背景
-2. 灰阶分层（80/70/50% Alpha 白作三层深度）
-3. 细 0.6px Hairline 边框（极淡的灰蓝）
-4. 深灰文字（#1D1D1F ~ #3C3C43），Apple 官方前景色
-5. 悬停时稍亮（不发光，只加强对比度）
-6. 统一控件高度与圆角（12/14/16 三档）
-7. 颜色克制：仅 Accent 用 Apple 蓝，其他用灰阶分层
+设计原则：
+  克制 · 留白 · 层次 · 安静
+
+色彩系统：
+  Background    #F5F5F7   接近白的浅灰
+  Window        #FFFFFF    纯白窗口
+  Primary Text  #1D1D1F   深灰（非纯黑）
+  Secondary     #86868B    中灰
+  Tertiary      #AEAEB2    浅灰
+  Border        rgba(0,0,0,0.06)  极淡边框
+  Accent        #007AFF   系统蓝
+  Accent Light  rgba(0,122,255,0.08)
+
+圆角层级：
+  窗口    12px
+  卡片    10px
+  按钮     6px
+  输入框   6px
+  Badge    4px
+
+字体：
+  -apple-system, SF Pro Text, PingFang SC
+  标题 17/600 · 正文 13/400 · 辅助 11/400
 """
 
-LIQUID_GLASS_PRO_QSS = """
+TIDY_QSS = """
+/* ========================================
+   全局
+   ======================================== */
 * {
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, "SF Pro Text", "SF Pro Display",
+                 "PingFang SC", "Segoe UI", sans-serif;
     color: #1D1D1F;
 }
 
@@ -22,199 +41,195 @@ QMainWindow, QWidget {
     background: transparent;
 }
 
-/* ============================================================
-   玻璃容器 - 三层深度（仿控制中心卡片）
-   ============================================================ */
+/* ========================================
+   窗口背景
+   ======================================== */
+#WindowBackground {
+    background: #F5F5F7;
+}
 
-.LiquidGlassPro {
-    background: rgba(250, 251, 255, 0.78);
-    border: 1px solid rgba(120, 130, 160, 0.18);
-    border-radius: 22px;
+#ContentBackground {
+    background: #FFFFFF;
+}
+
+/* ========================================
+   顶部栏
+   ======================================== */
+#TopBar {
+    background: rgba(255, 255, 255, 0.80);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+#LogoLabel {
+    font-size: 15px;
+    font-weight: 600;
     color: #1D1D1F;
+    letter-spacing: 0.3px;
 }
 
-.LiquidGlassPanel {
-    background: rgba(248, 250, 255, 0.82);
-    border: 1px solid rgba(120, 130, 160, 0.15);
-    border-radius: 16px;
-    color: #1D1D1F;
-}
-
-.LiquidGlassCard {
-    background: rgba(252, 253, 255, 0.88);
-    border: 1px solid rgba(120, 130, 160, 0.12);
-    border-radius: 12px;
-    color: #1D1D1F;
-}
-
-.LiquidGlassCard:hover {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(120, 130, 160, 0.25);
-}
-
-/* ============================================================
-   Dock 栏（动态绘制为主，这里只补充兜底）
-   ============================================================ */
-
-#DockItem {
-    background: transparent;
-    border: none;
-    border-radius: 14px;
-    padding: 4px;
-}
-
-#DockItem:hover {
-    background: rgba(255, 255, 255, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-}
-
-#DockItem:pressed {
-    background: rgba(10, 132, 255, 0.18);
-    border: 1px solid rgba(10, 132, 255, 0.35);
-    padding: 6px 2px 2px 6px;
-}
-
-/* ============================================================
-   系统按钮
-   ============================================================ */
-
-#SystemButton {
-    background: rgba(250, 251, 255, 0.75);
-    border: 1px solid rgba(120, 130, 160, 0.18);
-    border-radius: 12px;
-    padding: 6px;
-    font-size: 20px;
-}
-
-#SystemButton:hover {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(120, 130, 160, 0.30);
-}
-
-#SystemButton:pressed {
-    background: rgba(10, 132, 255, 0.20);
-    border: 1px solid rgba(10, 132, 255, 0.40);
-    padding: 8px 4px 4px 8px;
-}
-
-/* ============================================================
-   撤销按钮
-   ============================================================ */
-
-#UndoButton {
-    background: rgba(255, 204, 0, 0.18);
-    border: 1px solid rgba(255, 159, 10, 0.25);
-    border-radius: 14px;
-    padding: 6px;
-}
-
-#UndoButton:hover {
-    background: rgba(255, 204, 0, 0.30);
-    border: 1px solid rgba(255, 159, 10, 0.40);
-}
-
-#UndoButton:pressed {
-    background: rgba(255, 159, 10, 0.40);
-    padding: 8px 4px 4px 8px;
-}
-
-#UndoBadge {
-    background: rgba(255, 59, 48, 235);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    border-radius: 9px;
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-/* ============================================================
-   开始按钮
-   ============================================================ */
-
-#StartButton {
-    background: rgba(10, 132, 255, 0.12);
-    border: 1px solid rgba(10, 132, 255, 0.22);
-    border-radius: 14px;
-    padding: 6px;
-}
-
-#StartButton:hover {
-    background: rgba(10, 132, 255, 0.22);
-    border: 1px solid rgba(10, 132, 255, 0.40);
-}
-
-#StartButton:pressed {
-    background: rgba(10, 132, 255, 0.35);
-    padding: 8px 4px 4px 8px;
-}
-
-/* ============================================================
-   搜索框
-   ============================================================ */
-
+/* ========================================
+   搜索框 (Spotlight 风格)
+   ======================================== */
 #SearchBox {
-    background: rgba(255, 255, 255, 0.90);
-    border: 1px solid rgba(120, 130, 160, 0.20);
-    border-radius: 12px;
-    padding: 9px 18px;
+    background: rgba(0, 0, 0, 0.04);
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
     color: #1D1D1F;
     font-size: 13px;
-    selection-background-color: rgba(10, 132, 255, 0.25);
-    selection-color: #1D1D1F;
+    selection-background-color: rgba(0, 122, 255, 0.15);
 }
 
 #SearchBox:focus {
-    border: 1px solid rgba(10, 132, 255, 0.50);
-    background: rgba(255, 255, 255, 1.0);
+    background: rgba(0, 0, 0, 0.06);
+    border: none;
 }
 
-/* ============================================================
-   通用按钮
-   ============================================================ */
+#SearchBox::placeholder {
+    color: #86868B;
+}
 
+/* ========================================
+   按钮
+   ======================================== */
+
+/* 主按钮 - 系统蓝 */
 QPushButton {
-    background: rgba(10, 132, 255, 0.14);
-    border: 1px solid rgba(10, 132, 255, 0.25);
-    border-radius: 10px;
-    padding: 9px 22px;
-    color: #0A84FF;
+    background: #007AFF;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    color: #FFFFFF;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 QPushButton:hover {
-    background: rgba(10, 132, 255, 0.24);
-    border: 1px solid rgba(10, 132, 255, 0.40);
-    color: #0066CC;
+    background: #0066D6;
 }
 
 QPushButton:pressed {
-    background: rgba(10, 132, 255, 0.35);
-    padding: 11px 20px 7px 24px;
+    background: #0055B3;
 }
 
 QPushButton:disabled {
-    background: rgba(120, 130, 160, 0.10);
-    border: 1px solid rgba(120, 130, 160, 0.12);
-    color: rgba(120, 130, 160, 0.50);
+    background: #D1D1D6;
+    color: #86868B;
 }
 
+/* 次要按钮 - 灰色 */
 #SecondaryButton {
-    background: rgba(250, 251, 255, 0.70);
-    border: 1px solid rgba(120, 130, 160, 0.20);
+    background: rgba(0, 0, 0, 0.05);
     color: #1D1D1F;
+    border: none;
 }
 
 #SecondaryButton:hover {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(120, 130, 160, 0.30);
-    color: #1D1D1F;
+    background: rgba(0, 0, 0, 0.08);
 }
 
-/* ============================================================
-   标签
-   ============================================================ */
+#SecondaryButton:pressed {
+    background: rgba(0, 0, 0, 0.12);
+}
 
+/* 文字按钮 - 无背景 */
+#TextButton {
+    background: transparent;
+    color: #007AFF;
+    border: none;
+    padding: 6px 12px;
+}
+
+#TextButton:hover {
+    background: rgba(0, 122, 255, 0.06);
+}
+
+#TextButton:pressed {
+    background: rgba(0, 122, 255, 0.12);
+}
+
+/* ========================================
+   侧边栏
+   ======================================== */
+#Sidebar {
+    background: rgba(245, 245, 247, 0.60);
+    border-right: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+#SidebarHeader {
+    color: #86868B;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    letter-spacing: 0.5px;
+}
+
+#SidebarItem {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #1D1D1F;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+#SidebarItem:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+#SidebarItem:checked {
+    background: rgba(0, 0, 0, 0.07);
+    color: #1D1D1F;
+    font-weight: 500;
+}
+
+/* ========================================
+   文件列表
+   ======================================== */
+#FileList {
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+#FileList::item {
+    background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    padding: 4px 0;
+}
+
+#FileList::item:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+#FileList::item:selected {
+    background: rgba(0, 122, 255, 0.06);
+}
+
+/* ========================================
+   Empty State
+   ======================================== */
+#EmptyStateIcon {
+    color: #D1D1D6;
+    font-size: 48px;
+}
+
+#EmptyStateTitle {
+    color: #86868B;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+#EmptyStateDesc {
+    color: #AEAEB2;
+    font-size: 13px;
+}
+
+/* ========================================
+   标签
+   ======================================== */
 QLabel {
     color: #1D1D1F;
     font-size: 13px;
@@ -222,236 +237,239 @@ QLabel {
 }
 
 #TitleLabel {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 17px;
+    font-weight: 600;
     color: #1D1D1F;
 }
 
 #SubtitleLabel {
     font-size: 13px;
-    color: #6E6E73;
+    color: #86868B;
 }
 
-#CategoryBadge {
-    background: rgba(10, 132, 255, 0.12);
-    border: 1px solid rgba(10, 132, 255, 0.20);
-    border-radius: 8px;
-    padding: 4px 12px;
-    color: #0A84FF;
+#MetaLabel {
+    color: #86868B;
     font-size: 11px;
+}
+
+/* ========================================
+   Badge (极小)
+   ======================================== */
+#Badge {
+    background: #007AFF;
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: #FFFFFF;
+    font-size: 10px;
     font-weight: 600;
+    min-width: 16px;
 }
 
-/* ============================================================
-   列表
-   ============================================================ */
+#BadgeGray {
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: #86868B;
+    font-size: 10px;
+    font-weight: 500;
+}
 
-QListWidget {
-    background: transparent;
-    border: none;
-    outline: none;
+/* ========================================
+   输入框
+   ======================================== */
+QLineEdit, QTextEdit {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    padding: 7px 12px;
     color: #1D1D1F;
+    font-size: 13px;
+    selection-background-color: rgba(0, 122, 255, 0.15);
 }
 
-QListWidget::item {
+QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid rgba(0, 122, 255, 0.4);
+}
+
+/* ========================================
+   下拉框
+   ======================================== */
+QComboBox {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #1D1D1F;
+    font-size: 13px;
+}
+
+QComboBox:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+
+QComboBox QAbstractItemView {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    color: #1D1D1F;
+    selection-background-color: rgba(0, 122, 255, 0.08);
+    selection-color: #007AFF;
+    padding: 4px;
+    outline: none;
+}
+
+/* ========================================
+   复选框
+   ======================================== */
+QCheckBox {
+    color: #1D1D1F;
+    spacing: 8px;
+    font-size: 13px;
     background: transparent;
-    border-radius: 10px;
-    padding: 9px;
-    margin: 2px 0;
 }
 
-QListWidget::item:hover {
-    background: rgba(120, 130, 160, 0.10);
-    border: 1px solid rgba(120, 130, 160, 0.12);
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid #D1D1D6;
+    background: #FFFFFF;
 }
 
-QListWidget::item:selected {
-    background: rgba(10, 132, 255, 0.16);
-    border: 1px solid rgba(10, 132, 255, 0.30);
-    color: #0A84FF;
+QCheckBox::indicator:checked {
+    background: #007AFF;
+    border: 1.5px solid #007AFF;
 }
 
-/* ============================================================
-   滚动条
-   ============================================================ */
+QCheckBox::indicator:hover {
+    border: 1.5px solid #86868B;
+}
 
+/* ========================================
+   进度条
+   ======================================== */
+QProgressBar {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 3px;
+    height: 4px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background: #007AFF;
+    border-radius: 3px;
+}
+
+/* ========================================
+   滚动条 (极细)
+   ======================================== */
 QScrollBar:vertical {
     background: transparent;
-    width: 8px;
-    margin: 4px 3px;
+    width: 6px;
+    margin: 0;
 }
 
 QScrollBar::handle:vertical {
-    background: rgba(120, 130, 160, 0.28);
-    border-radius: 4px;
-    min-height: 36px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+    min-height: 30px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background: rgba(120, 130, 160, 0.48);
+    background: rgba(0, 0, 0, 0.25);
 }
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
     height: 0;
 }
 
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
 QScrollBar:horizontal {
     background: transparent;
-    height: 8px;
-    margin: 3px 4px;
+    height: 6px;
+    margin: 0;
 }
 
 QScrollBar::handle:horizontal {
-    background: rgba(120, 130, 160, 0.28);
-    border-radius: 4px;
-    min-width: 36px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+    min-width: 30px;
 }
 
 QScrollBar::handle:horizontal:hover {
-    background: rgba(120, 130, 160, 0.48);
+    background: rgba(0, 0, 0, 0.25);
 }
 
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
     width: 0;
 }
 
-/* ============================================================
-   复选框
-   ============================================================ */
-
-QCheckBox {
+/* ========================================
+   菜单
+   ======================================== */
+QMenu {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    padding: 4px;
     color: #1D1D1F;
-    spacing: 10px;
-    font-size: 13px;
-    background: transparent;
 }
 
-QCheckBox::indicator {
-    width: 19px;
-    height: 19px;
+QMenu::item {
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+QMenu::item:hover {
+    background: rgba(0, 122, 255, 0.08);
+    color: #007AFF;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+    margin: 4px 8px;
+}
+
+/* ========================================
+   Dock
+   ======================================== */
+#DockContainer {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+#DockButton {
+    background: transparent;
+    border: none;
     border-radius: 6px;
-    border: 1.2px solid rgba(120, 130, 160, 0.35);
-    background: rgba(255, 255, 255, 0.90);
-}
-
-QCheckBox::indicator:checked {
-    background: rgba(10, 132, 255, 230);
-    border: 1.2px solid rgba(10, 132, 255, 0.70);
-}
-
-QCheckBox::indicator:hover {
-    border: 1.2px solid rgba(10, 132, 255, 0.45);
-}
-
-/* ============================================================
-   下拉框
-   ============================================================ */
-
-QComboBox {
-    background: rgba(255, 255, 255, 0.90);
-    border: 1px solid rgba(120, 130, 160, 0.20);
-    border-radius: 10px;
-    padding: 7px 14px;
+    padding: 4px;
     color: #1D1D1F;
-    font-size: 13px;
+    font-size: 11px;
 }
 
-QComboBox:hover {
-    border: 1px solid rgba(120, 130, 160, 0.35);
+#DockButton:hover {
+    background: rgba(0, 0, 0, 0.06);
 }
 
-QComboBox::drop-down {
-    border: none;
-    width: 22px;
+#DockButton:pressed {
+    background: rgba(0, 0, 0, 0.10);
 }
 
-QComboBox QAbstractItemView {
-    background: rgba(250, 251, 255, 0.98);
-    border: 1px solid rgba(120, 130, 160, 0.18);
-    border-radius: 12px;
-    color: #1D1D1F;
-    selection-background-color: rgba(10, 132, 255, 0.16);
-    selection-color: #0A84FF;
-    padding: 5px;
-    outline: none;
-}
-
-/* ============================================================
-   输入框
-   ============================================================ */
-
-QLineEdit, QTextEdit {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(120, 130, 160, 0.22);
-    border-radius: 9px;
-    padding: 7px 13px;
-    color: #1D1D1F;
-    font-size: 13px;
-    selection-background-color: rgba(10, 132, 255, 0.25);
-    selection-color: #1D1D1F;
-}
-
-QLineEdit:focus, QTextEdit:focus {
-    border: 1px solid rgba(10, 132, 255, 0.50);
-    background: rgba(255, 255, 255, 1.0);
-}
-
-/* ============================================================
-   进度条
-   ============================================================ */
-
-QProgressBar {
-    background: rgba(120, 130, 160, 0.12);
-    border: 1px solid rgba(120, 130, 160, 0.15);
-    border-radius: 7px;
-    height: 9px;
-    text-align: center;
-    color: #3C3C43;
-}
-
-QProgressBar::chunk {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0.0 #64D2FF,
-        stop:0.5 #0A84FF,
-        stop:1.0 #5E5CE6
-    );
-    border-radius: 7px;
-}
-
-/* ============================================================
-   分类侧边栏
-   ============================================================ */
-
-#CategorySidebar {
-    background: rgba(250, 251, 255, 0.60);
-    border-right: 1px solid rgba(120, 130, 160, 0.12);
-}
-
-#CategoryItem {
-    background: transparent;
-    border: none;
-    border-radius: 10px;
-    padding: 11px 16px;
-    color: #6E6E73;
-    text-align: left;
-    font-size: 13px;
-}
-
-#CategoryItem:hover {
-    background: rgba(120, 130, 160, 0.10);
-    color: #1D1D1F;
-}
-
-#CategoryItem:checked {
-    background: rgba(10, 132, 255, 0.14);
-    color: #0A84FF;
-    border: 1px solid rgba(10, 132, 255, 0.22);
-}
-
-/* ============================================================
-   Tab 组件
-   ============================================================ */
-
+/* ========================================
+   Tab
+   ======================================== */
 QTabWidget::pane {
     border: none;
     background: transparent;
@@ -459,12 +477,10 @@ QTabWidget::pane {
 
 QTabBar::tab {
     background: transparent;
-    color: #6E6E73;
-    padding: 11px 22px;
+    color: #86868B;
+    padding: 8px 16px;
     border: none;
-    border-bottom: 2px solid transparent;
     font-size: 13px;
-    font-weight: 500;
 }
 
 QTabBar::tab:hover {
@@ -472,155 +488,23 @@ QTabBar::tab:hover {
 }
 
 QTabBar::tab:selected {
-    color: #0A84FF;
-    border-bottom: 2px solid rgba(10, 132, 255, 230);
-}
-
-/* ============================================================
-   菜单
-   ============================================================ */
-
-QMenu {
-    background: rgba(250, 251, 255, 0.98);
-    border: 1px solid rgba(120, 130, 160, 0.16);
-    border-radius: 13px;
-    padding: 6px;
     color: #1D1D1F;
+    font-weight: 500;
 }
 
-QMenu::item {
-    padding: 9px 20px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: #1D1D1F;
-}
-
-QMenu::item:hover {
-    background: rgba(10, 132, 255, 0.14);
-    color: #0A84FF;
-}
-
-QMenu::separator {
-    height: 1px;
-    background: rgba(120, 130, 160, 0.12);
-    margin: 5px 10px;
-}
-
-/* ============================================================
-   Quick Look 预览面板
-   ============================================================ */
-
-#QuickLookPanel {
-    background: rgba(250, 251, 255, 0.96);
-    border: 1px solid rgba(120, 130, 160, 0.18);
-    border-radius: 18px;
-    color: #1D1D1F;
-}
-
-#QuickLookImage {
-    background: rgba(255, 255, 255, 0.90);
-    border: 1px solid rgba(120, 130, 160, 0.14);
-    border-radius: 11px;
-}
-
-#QuickLookInfo {
-    background: rgba(250, 251, 255, 0.82);
-    border: 1px solid rgba(120, 130, 160, 0.14);
-    border-radius: 9px;
-    padding: 9px 13px;
-    color: #1D1D1F;
-}
-
-#ConfidenceBar {
-    background: rgba(120, 130, 160, 0.10);
-    border: 1px solid rgba(120, 130, 160, 0.12);
-    border-radius: 5px;
-    height: 7px;
-}
-
-#ConfidenceChunk {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0.0 #64D2FF,
-        stop:0.5 #0A84FF,
-        stop:1.0 #BF5AF2
-    );
-    border-radius: 5px;
-}
-
-/* ============================================================
-   虚拟文件夹
-   ============================================================ */
-
-#VirtualFolder {
-    background: rgba(255, 159, 10, 0.14);
-    border: 1px solid rgba(255, 159, 10, 0.22);
-    border-radius: 12px;
-    padding: 6px;
-}
-
-#VirtualFolder:hover {
-    background: rgba(255, 159, 10, 0.24);
-    border: 1px solid rgba(255, 159, 10, 0.40);
-}
-
-#VirtualFolder:pressed {
-    background: rgba(255, 159, 10, 0.35);
-    padding: 8px 4px 4px 8px;
-}
-
-/* ============================================================
+/* ========================================
    Toast
-   ============================================================ */
-
+   ======================================== */
 #Toast {
-    background: rgba(250, 251, 255, 0.96);
-    border: 1px solid rgba(120, 130, 160, 0.18);
-    border-radius: 11px;
-    padding: 11px 18px;
-    color: #1D1D1F;
-}
-
-/* ============================================================
-   撤销面板
-   ============================================================ */
-
-#UndoPanel {
-    background: rgba(250, 251, 255, 0.96);
-    border: 1px solid rgba(120, 130, 160, 0.18);
-    border-radius: 16px;
-    color: #1D1D1F;
-}
-
-#UndoRecordItem {
-    background: rgba(250, 251, 255, 0.72);
-    border: 1px solid rgba(120, 130, 160, 0.12);
-    border-radius: 9px;
-    padding: 9px 13px;
-    color: #1D1D1F;
-}
-
-#UndoRecordItem:hover {
-    background: rgba(10, 132, 255, 0.12);
-    border: 1px solid rgba(10, 132, 255, 0.22);
-    color: #0A84FF;
-}
-
-#UndoRecordItem:pressed {
-    background: rgba(10, 132, 255, 0.22);
-    color: #0066CC;
-}
-
-/* ============================================================
-   悬浮球
-   ============================================================ */
-
-#FloatingBall {
-    background: transparent;
-    border: none;
+    background: rgba(30, 30, 30, 0.92);
+    border-radius: 8px;
+    padding: 10px 16px;
+    color: #FFFFFF;
+    font-size: 13px;
 }
 """
 
 
-def apply_liquid_glass(app):
-    """应用 Apple 风格样式"""
-    app.setStyleSheet(LIQUID_GLASS_PRO_QSS)
+def apply_tidy_style(app):
+    """应用设计系统"""
+    app.setStyleSheet(TIDY_QSS)

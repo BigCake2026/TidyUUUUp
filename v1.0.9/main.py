@@ -21,7 +21,7 @@ from PyQt5.QtCore import Qt, QTimer, QPoint, QObject
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor, QFont
 
-from ui.styles import apply_liquid_glass
+from ui.styles import apply_tidy_style
 from ui.dock_bar import DockBar
 from ui.main_window import MainWindow
 from ui.floating_ball import FloatingBall
@@ -47,11 +47,11 @@ def create_app_icon():
 
     from PyQt5.QtGui import QLinearGradient
     gradient = QLinearGradient(0, 0, 64, 64)
-    gradient.setColorAt(0, QColor(100, 150, 255))
-    gradient.setColorAt(1, QColor(180, 100, 255))
+    gradient.setColorAt(0, QColor(240, 240, 245))
+    gradient.setColorAt(1, QColor(220, 220, 230))
     painter.setBrush(gradient)
     painter.setPen(Qt.NoPen)
-    painter.drawRoundedRect(4, 4, 56, 56, 16, 16)
+    painter.drawRoundedRect(4, 4, 56, 56, 12, 12)
 
     painter.setPen(QColor(255, 255, 255, 230))
     font = QFont()
@@ -71,7 +71,7 @@ class TidyUUUUpApp(QObject):
         self.app.setQuitOnLastWindowClosed(False)
         self.app.setApplicationName("TidyUUUUp")
 
-        apply_liquid_glass(self.app)
+        apply_tidy_style(self.app)
 
         self.icon = create_app_icon()
         self.app.setWindowIcon(self.icon)
