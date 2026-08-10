@@ -11,12 +11,12 @@ from pathlib import Path
 class SmartRuleEngine:
     """智能文件分类规则引擎"""
 
-    # 预设的智能分类区域（Apple 标准色系）
+    # 预设的智能分类区域（Apple HIG：统一 accent 色，不用彩虹色）
     DEFAULT_ZONES = {
         "工作区域": {
             "description": "办公、文档、项目相关",
             "color": "#0A84FF",
-            "icon": "💼",
+            "icon": "",
             "rules": [
                 {"type": "extension", "value": [".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pdf", ".txt", ".rtf", ".csv", ".md"]},
                 {"type": "extension", "value": [".psd", ".ai", ".fig", ".sketch", ".xd"]},
@@ -27,8 +27,8 @@ class SmartRuleEngine:
         },
         "娱乐区域": {
             "description": "游戏、视频、音乐、娱乐",
-            "color": "#FF375F",
-            "icon": "🎮",
+            "color": "#0A84FF",
+            "icon": "",
             "rules": [
                 {"type": "extension", "value": [".exe", ".msi", ".apk", ".ipa", ".iso", ".rom"]},
                 {"type": "extension", "value": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"]},
@@ -39,8 +39,8 @@ class SmartRuleEngine:
         },
         "学习区域": {
             "description": "学习资料、教程、书籍",
-            "color": "#30D158",
-            "icon": "📚",
+            "color": "#0A84FF",
+            "icon": "",
             "rules": [
                 {"type": "extension", "value": [".epub", ".mobi", ".azw", ".azw3", ".pdf"]},
                 {"type": "name_keyword", "value": ["教程", "课程", "学习", "考试", "笔记", "作业", "论文", "课件", "课本", "教材", "learn", "course", "tutorial"]},
@@ -49,16 +49,16 @@ class SmartRuleEngine:
         },
         "图片区域": {
             "description": "图片、照片、壁纸",
-            "color": "#FF9F0A",
-            "icon": "🖼️",
+            "color": "#0A84FF",
+            "icon": "",
             "rules": [
                 {"type": "extension", "value": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".ico", ".tiff", ".raw", ".heic"]},
             ]
         },
         "下载区域": {
             "description": "刚下载的文件、安装包",
-            "color": "#BF5AF2",
-            "icon": "📦",
+            "color": "#0A84FF",
+            "icon": "",
             "rules": [
                 {"type": "extension", "value": [".zip", ".rar", ".7z", ".tar", ".gz"]},
                 {"type": "extension", "value": [".exe", ".msi", ".apk", ".dmg", ".pkg"]},
@@ -68,8 +68,8 @@ class SmartRuleEngine:
         },
         "临时文件": {
             "description": "缓存、临时文件、日志",
-            "color": "#8E8E93",
-            "icon": "🗑️",
+            "color": "#0A84FF",
+            "icon": "",
             "rules": [
                 {"type": "extension", "value": [".tmp", ".temp", ".log", ".crdownload", ".part", ".cache", ".bak", ".old"]},
                 {"type": "name_keyword", "value": ["~$", ".tmp", "副本"]},

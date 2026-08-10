@@ -247,15 +247,15 @@ class DockBar(QWidget):
         layout.addWidget(separator1)
 
         # 系统功能按钮
-        self.search_btn = self._create_system_button("🔍", "搜索")
+        self.search_btn = self._create_system_button("搜索", "搜索文件")
         self.search_btn.clicked.connect(self.search_triggered.emit)
         layout.addWidget(self.search_btn)
 
-        self.files_btn = self._create_system_button("📁", "文件")
+        self.files_btn = self._create_system_button("文件", "文件管理")
         self.files_btn.clicked.connect(self.files_triggered.emit)
         layout.addWidget(self.files_btn)
 
-        self.organizer_btn = self._create_system_button("🧹", "整理")
+        self.organizer_btn = self._create_system_button("整理", "智能整理")
         self.organizer_btn.clicked.connect(self.organizer_triggered.emit)
         layout.addWidget(self.organizer_btn)
 
@@ -272,7 +272,7 @@ class DockBar(QWidget):
         layout.addLayout(self.apps_layout)
 
         # 添加固定应用按钮
-        self.add_pin_btn = self._create_system_button("➕", "添加常用软件/快捷方式")
+        self.add_pin_btn = self._create_system_button("添加", "添加常用软件")
         self.add_pin_btn.clicked.connect(self._on_add_pinned_app)
         layout.addWidget(self.add_pin_btn)
 
@@ -295,52 +295,37 @@ class DockBar(QWidget):
         layout.addWidget(self.time_widget)
 
         # 系统设置按钮
-        self.settings_btn = self._create_system_button("⚙️", "设置")
+        self.settings_btn = self._create_system_button("设置", "设置")
         self.settings_btn.clicked.connect(self.settings_triggered.emit)
         layout.addWidget(self.settings_btn)
 
-    def _create_system_button(self, emoji, tooltip):
-        """极简 Apple 风：浅磨砂底 + 单层 emoji"""
-        btn = QPushButton()
+    def _create_system_button(self, label_text, tooltip):
+        """Apple 风文字按钮：浅磨砂底 + Apple 蓝文字"""
+        btn = QPushButton(label_text)
         btn.setObjectName("DockItem")
         btn.setFixedSize(56, 56)
         btn.setCursor(Qt.PointingHandCursor)
         btn.setToolTip(tooltip)
         btn.setProperty("baseSize", QSize(56, 56))
-
-        pixmap = QPixmap(48, 48)
-        pixmap.fill(Qt.transparent)
-        painter = QPainter(pixmap)
-        painter.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
-
-        outer = QRectF(8.0, 8.0, 32.0, 32.0)
-        r = 9.0
-
-        # 1. 极简浅色底
-        bg = QLinearGradient(0.0, outer.top(), 0.0, outer.bottom())
-        bg.setColorAt(0.0, QColor(250, 251, 255))
-        bg.setColorAt(1.0, QColor(232, 236, 246))
-        painter.setPen(Qt.NoPen)
-        painter.setBrush(QBrush(bg))
-        painter.drawRoundedRect(outer, r, r)
-
-        # 2. 细描边
-        painter.setPen(QPen(QColor(120, 130, 160, 35), 0.6))
-        painter.setBrush(Qt.NoBrush)
-        painter.drawRoundedRect(outer, r, r)
-
-        # 3. emoji 单层绘制
-        f = QFont()
-        f.setPointSizeF(18.0)
-        f.setWeight(QFont.DemiBold)
-        f.setStyleStrategy(QFont.PreferAntialias)
-        painter.setFont(f)
-        painter.setPen(QColor(70, 75, 100, 235))
-        painter.drawText(outer, Qt.AlignCenter, emoji)
-
-        painter.end()
-        btn.setIcon(QIcon(pixmap))
-        btn.setIconSize(QSize(48, 48))
+        btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(255, 255, 255, 0.60);
+                border: 1px solid rgba(120, 130, 160, 0.15);
+                border-radius: 14px;
+                color: #0A84FF;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 4px;
+            }
+            QPushButton:hover {
+                background: rgba(10, 132, 255, 0.12);
+                border: 1px solid rgba(10, 132, 255, 0.25);
+                color: #0A84FF;
+            }
+            QPushButton:pressed {
+                background: rgba(10, 132, 255, 0.25);
+            }
+        """)
         return btn
 
     def _create_start_button(self):
@@ -512,41 +497,41 @@ class DockBar(QWidget):
         """)
 
         # 常用程序
-        explorer_action = QAction("📁  文件资源管理器", self)
+        explorer_action = QAction("文件资源管理器", self)
         explorer_action.triggered.connect(lambda: self._run_system_cmd("explorer"))
         menu.addAction(explorer_action)
 
-        settings_action = QAction("⚙️  设置", self)
+        settings_action = QAction("设置", self)
         settings_action.triggered.connect(lambda: self._run_system_cmd("ms-settings:"))
         menu.addAction(settings_action)
 
-        cmd_action = QAction("💻  命令提示符", self)
+        cmd_action = QAction("命令提示符", self)
         cmd_action.triggered.connect(lambda: self._run_system_cmd("cmd"))
         menu.addAction(cmd_action)
 
-        taskmgr_action = QAction("📊  任务管理器", self)
+        taskmgr_action = QAction("任务管理器", self)
         taskmgr_action.triggered.connect(lambda: self._run_system_cmd("taskmgr"))
         menu.addAction(taskmgr_action)
 
         menu.addSeparator()
 
         # 系统操作
-        run_action = QAction("🔍  运行 (Win+R)", self)
+        run_action = QAction("运行 (Win+R)", self)
         run_action.triggered.connect(lambda: self._run_system_cmd("shell:::{2559a1f3-21d7-11d4-bdaf-00c04f60b9f0}"))
         menu.addAction(run_action)
 
         menu.addSeparator()
 
         # 电源操作
-        shutdown_action = QAction("⏻  关机", self)
+        shutdown_action = QAction("关机", self)
         shutdown_action.triggered.connect(lambda: self._run_system_cmd("shutdown /s /t 0"))
         menu.addAction(shutdown_action)
 
-        restart_action = QAction("↻  重启", self)
+        restart_action = QAction("重启", self)
         restart_action.triggered.connect(lambda: self._run_system_cmd("shutdown /r /t 0"))
         menu.addAction(restart_action)
 
-        sleep_action = QAction("⏾  睡眠", self)
+        sleep_action = QAction("睡眠", self)
         sleep_action.triggered.connect(lambda: self._run_system_cmd("rundll32.exe powrprof.dll,SetSuspendState 0,1,0"))
         menu.addAction(sleep_action)
 
@@ -666,11 +651,11 @@ class DockBar(QWidget):
             }
         """)
 
-        action_browse = QAction("📂  浏览程序...", self)
+        action_browse = QAction("浏览程序...", self)
         action_browse.triggered.connect(self._browse_and_pin_app)
         menu.addAction(action_browse)
 
-        action_shortcut = QAction("🔗  添加快捷方式...", self)
+        action_shortcut = QAction("添加快捷方式...", self)
         action_shortcut.triggered.connect(self._add_shortcut_dialog)
         menu.addAction(action_shortcut)
 
@@ -680,7 +665,7 @@ class DockBar(QWidget):
         common_apps = self._detect_common_apps()
         if common_apps:
             for app_name, app_path in common_apps[:6]:
-                action = QAction(f"📌  {app_name}", self)
+                action = QAction(f"{app_name}", self)
                 action.triggered.connect(lambda checked, n=app_name, p=app_path: self._pin_app(n, p))
                 menu.addAction(action)
 
@@ -917,7 +902,7 @@ class DockBar(QWidget):
 
             menu.addSeparator()
 
-            unpin_action = QAction("📌  从 Dock 取消固定", self)
+            unpin_action = QAction("从 Dock 取消固定", self)
             unpin_action.triggered.connect(lambda: self._unpin_app(path, item))
             menu.addAction(unpin_action)
 

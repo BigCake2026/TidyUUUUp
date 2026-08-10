@@ -23,12 +23,8 @@ from PyQt5.QtGui import (
 from core.smart_engine import SmartRuleEngine
 
 
-CATEGORY_FOLDER_ICONS = {
-    '图片': '🖼️', '视频': '🎬', '音频': '🎵', '文档': '📄',
-    '表格': '📊', '演示': '📽️', '压缩包': '📦', '代码': '💻',
-    '可执行': '⚙️', '电子书': '📚', '字体': '🔤', '设计': '🎨',
-    '3D模型': '🧊', '数据': '📋', '垃圾缓存': '🗑️', '其他': '📝'
-}
+# Apple HIG: 侧边栏使用纯文字标签 + 统一 accent 色（#0A84FF）
+# 不再使用 emoji 分类图标，回归 macOS Finder 风格
 
 
 class DirectoryTreePopup(QWidget):
@@ -74,19 +70,9 @@ class DirectoryTreePopup(QWidget):
         inner.setContentsMargins(14, 14, 14, 14)
         inner.setSpacing(10)
 
-        # 标题栏
+        # 标题栏（纯文字，Apple HIG 风格）
         header = QHBoxLayout()
         header.setSpacing(10)
-
-        self.icon_label = QLabel("📁")
-        self.icon_label.setFixedSize(28, 28)
-        self.icon_label.setAlignment(Qt.AlignCenter)
-        self.icon_label.setStyleSheet("""
-            background: rgba(10, 132, 255, 0.12);
-            border-radius: 8px;
-            font-size: 16px;
-        """)
-        header.addWidget(self.icon_label)
 
         self.title_label = QLabel("目录树")
         self.title_label.setStyleSheet("""
@@ -187,15 +173,10 @@ class DirectoryTreePopup(QWidget):
         根据文件列表填充目录树
         按子目录分组显示，无子目录则直接显示文件列表
         files: list of {name, path, size, modified, category}
+        zone_icon / zone_color 参数保留以兼容调用方，但视觉上统一使用 Apple 蓝
         """
         self.tree.clear()
         self.title_label.setText(zone_name)
-        self.icon_label.setText(zone_icon)
-        self.icon_label.setStyleSheet(f"""
-            background: {zone_color}40;
-            border-radius: 8px;
-            font-size: 16px;
-        """)
         self.count_badge.setText(str(len(files)))
 
         # 按目录分组
@@ -216,11 +197,10 @@ class DirectoryTreePopup(QWidget):
             for info in sorted(files, key=lambda x: x.get('modified', 0), reverse=True):
                 self._add_file_item(None, info, zone_color)
         else:
-            # 多目录分组显示
+            # 多目录分组显示（纯文字，无 emoji 图标）
             for dir_path in sorted_dirs:
                 dir_name = os.path.basename(dir_path) or dir_path
-                dir_icon = "📂"
-                dir_item = QTreeWidgetItem([f"  {dir_icon}  {dir_name}"])
+                dir_item = QTreeWidgetItem([f"  {dir_name}"])
                 dir_item.setData(0, Qt.UserRole, dir_path)
                 dir_item.setData(0, Qt.UserRole + 1, 'folder')
                 dir_item.setForeground(0, QColor(29, 29, 31, 240))
@@ -241,7 +221,7 @@ class DirectoryTreePopup(QWidget):
         # 计算高度
         item_count = self.tree.topLevelItemCount()
         if item_count == 0:
-            empty = QTreeWidgetItem(["  📭  暂无文件"])
+            empty = QTreeWidgetItem(["  暂无文件"])
             empty.setForeground(0, QColor(110, 110, 115, 200))
             self.tree.addTopLevelItem(empty)
             self.setFixedHeight(180)
@@ -263,8 +243,6 @@ class DirectoryTreePopup(QWidget):
             self.setFixedHeight(min(max(calc_h, 180), 420))
 
     def _add_file_item(self, parent, info, zone_color):
-        cat = info.get('category', '其他')
-        cat_icon = CATEGORY_FOLDER_ICONS.get(cat, '📝')
         name = info.get('name', '未知')
         size_kb = info.get('size', 0) / 1024
         if size_kb < 1024:
@@ -272,7 +250,8 @@ class DirectoryTreePopup(QWidget):
         else:
             size_str = f"{size_kb / 1024:.1f} MB"
 
-        label = f"  {cat_icon}  {name}"
+        # 纯文字标签，无分类 emoji
+        label = f"  {name}"
         item = QTreeWidgetItem([label])
         item.setData(0, Qt.UserRole, info.get('path', ''))
         item.setData(0, Qt.UserRole + 1, 'file')
@@ -431,11 +410,12 @@ class ZoneFolderButton(QPushButton):
         self._hovered = False
         self._pressed = False
 
-        self.setFixedSize(60, 60)
+        # 宽度 72 用于容纳文字标签
+        self.setFixedSize(72, 56)
         self.setCursor(Qt.PointingHandCursor)
         self.setMouseTracking(True)
         self.setStyleSheet("background: transparent; border: none;")
-        self.setProperty("baseSize", QSize(60, 60))
+        self.setProperty("baseSize", QSize(72, 56))
 
         self.setToolTip(f"{zone_name}（{zone_config.get('description', '')}）· 悬停查看目录")
 
@@ -468,130 +448,128 @@ class ZoneFolderButton(QPushButton):
         super().mouseReleaseEvent(event)
 
     def paintEvent(self, event):
+        """
+        纯文字标签风格（Apple HIG：macOS Finder 侧边栏）
+        - 不画文件夹形状、不画 emoji
+        - 圆角矩形 + 中央文字（zone_name）
+        - 统一 Apple 蓝 #0A84FF 作为 accent 色
+        - 悬停：背景稍亮 + 轻微上浮
+        - 按压：背景变蓝 accent + 文字变白
+        """
         painter = QPainter(self)
-        painter.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform | QPainter.TextAntialiasing)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
 
         rect = self.rect()
-        base_color = QColor(self.config.get('color', '#0A84FF'))
-        icon_text = self.config.get('icon', CATEGORY_FOLDER_ICONS.get(self.zone_name, '📁'))
-
-        # 浮动缩放
-        scale = 1.0
-        y_offs = 0
-        if self._pressed:
-            scale = 0.94
-            y_offs = 1
-        elif self._hovered:
-            scale = 1.07
-            y_offs = -3
-
-        painter.save()
-        cx = rect.width() / 2.0
-        cy = rect.height() / 2.0 + y_offs
-        painter.translate(cx, cy)
-        painter.scale(scale, scale)
-        painter.translate(-cx, -cy)
-
         w = float(rect.width())
         h = float(rect.height())
 
-        # === Finder 风格比例 ===
-        body_w = w - 10.0
-        body_h = h - 20.0
-        body_x = 5.0
-        body_y = 18.0
-        radius = 8.0
+        # Apple 统一 accent 色（不再使用 per-zone 多色）
+        accent = QColor(0x0A, 0x84, 0xFF)
 
-        tab_w = body_w * 0.42
-        tab_h = 7.0
-        tab_x = body_x + 4.0
-        tab_y = 12.0
-        tab_r = 2.5
+        # 浮动偏移（悬停上浮 2px，按压下沉 1px）
+        y_offs = 0
+        if self._pressed:
+            y_offs = 1
+        elif self._hovered:
+            y_offs = -2
 
-        # 1. 单一柔和阴影
-        if self._hovered or self._pressed:
-            s_alpha = 30 if self._hovered else 18
-            shadow = QRadialGradient(
-                body_x + body_w / 2.0, body_y + body_h + 2, body_w * 0.5
-            )
-            shadow.setColorAt(0.0, QColor(0, 0, 0, s_alpha))
-            shadow.setColorAt(1.0, QColor(0, 0, 0, 0))
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(QBrush(shadow))
-            painter.drawEllipse(QRectF(body_x - 2, body_y + body_h - 4, body_w + 4, 12))
+        painter.save()
+        painter.translate(0, y_offs)
 
-        # 2. 合成文件夹路径（主体 + 舌头一次成型）
+        # === 圆角矩形主体（Liquid Glass：浅色半透明 + 细边框） ===
+        margin_x = 4.0
+        margin_y = 6.0
+        body_w = w - margin_x * 2.0
+        body_h = h - margin_y * 2.0
+        body_x = margin_x
+        body_y = margin_y
+        radius = 12.0
+
         body_rect = QRectF(body_x, body_y, body_w, body_h)
-        tab_rect = QRectF(tab_x, tab_y, tab_w, tab_h + 3.0)
-        path_body = QPainterPath()
-        path_body.addRoundedRect(body_rect, radius, radius)
-        path_tab = QPainterPath()
-        path_tab.addRoundedRect(tab_rect, tab_r, tab_r)
-        folder_path = path_body.united(path_tab)
+        body_path = QPainterPath()
+        body_path.addRoundedRect(body_rect, radius, radius)
 
-        # 3. 主体渐变（极简 Finder 三色：顶白→中 tint→底稍深 tint，不加多余装饰）
-        def mix(a, b, t):
-            t = max(0.0, min(1.0, t))
-            return QColor(
-                int(a.red() + (b.red() - a.red()) * t),
-                int(a.green() + (b.green() - a.green()) * t),
-                int(a.blue() + (b.blue() - a.blue()) * t),
-                int(a.alpha() + (b.alpha() - a.alpha()) * t),
-            )
+        # 背景填充：根据状态切换
+        if self._pressed:
+            # 按压：accent 蓝填充
+            bg = QLinearGradient(0, body_y, 0, body_y + body_h)
+            bg.setColorAt(0.0, QColor(0x2E, 0x9B, 0xFF, 255))
+            bg.setColorAt(1.0, QColor(0x0A, 0x84, 0xFF, 255))
+            painter.setPen(Qt.NoPen)
+            painter.fillPath(body_path, QBrush(bg))
+            border_color = QColor(0x0A, 0x84, 0xFF, 255)
+        elif self._hovered:
+            # 悬停：稍亮的浅色玻璃
+            bg = QLinearGradient(0, body_y, 0, body_y + body_h)
+            bg.setColorAt(0.0, QColor(255, 255, 255, 248))
+            bg.setColorAt(1.0, QColor(245, 247, 252, 244))
+            painter.setPen(Qt.NoPen)
+            painter.fillPath(body_path, QBrush(bg))
+            border_color = QColor(0x0A, 0x84, 0xFF, 140)
+        else:
+            # 默认：极浅玻璃
+            bg = QLinearGradient(0, body_y, 0, body_y + body_h)
+            bg.setColorAt(0.0, QColor(255, 255, 255, 220))
+            bg.setColorAt(1.0, QColor(244, 246, 250, 210))
+            painter.setPen(Qt.NoPen)
+            painter.fillPath(body_path, QBrush(bg))
+            border_color = QColor(120, 130, 160, 70)
 
-        g = QLinearGradient(0.0, body_y - 2, 0.0, body_y + body_h)
-        g.setColorAt(0.0,  mix(QColor(255, 255, 255, 242), base_color, 0.08))
-        g.setColorAt(0.55, mix(QColor(255, 255, 255, 235), base_color, 0.30))
-        g.setColorAt(1.0,  mix(QColor(250, 250, 255, 230), base_color, 0.55))
-        painter.setPen(Qt.NoPen)
-        painter.fillPath(folder_path, QBrush(g))
-
-        # 4. 单层极细高光（只在主体顶部 1px）
-        hl = QRectF(body_x + 3.0, body_y + 2.5, body_w - 6.0, 1.0)
-        painter.setBrush(QColor(255, 255, 255, 95))
-        painter.drawRoundedRect(hl, 0.5, 0.5)
-
-        # 5. 外描边 + 内描边（极简双层各 1 次）
-        painter.setPen(QPen(QColor(base_color.red(), base_color.green(), base_color.blue(), 55), 0.8))
+        # 细边框
+        painter.setPen(QPen(border_color, 0.8))
         painter.setBrush(Qt.NoBrush)
-        painter.drawPath(folder_path)
+        painter.drawPath(body_path)
 
-        inner_f = QRectF(body_x + 1.0, body_y + 1.0, body_w - 2.0, body_h - 2.0)
-        inner_path = QPainterPath()
-        inner_path.addRoundedRect(inner_f, max(radius - 1.0, 1.0), max(radius - 1.0, 1.0))
-        painter.setPen(QPen(QColor(255, 255, 255, 45), 0.5))
-        painter.drawPath(inner_path)
+        # 顶部内高光（仅默认/悬停状态，按压时不画）
+        if not self._pressed:
+            hl = QRectF(body_x + 4.0, body_y + 1.5, body_w - 8.0, 1.0)
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QColor(255, 255, 255, 120))
+            painter.drawRoundedRect(hl, 0.5, 0.5)
 
-        # 6. 图标：单层绘制，居中稍大（不再画多层阴影描边导致模糊）
-        icon_rect = QRectF(body_x + 6.0, body_y + 5.0, body_w - 12.0, body_h - 10.0)
+        # === 中央文字标签（zone_name） ===
+        # 按压时文字变白，否则用 #1D1D1F
+        if self._pressed:
+            text_color = QColor(255, 255, 255, 255)
+        else:
+            text_color = QColor(0x1D, 0x1D, 0x1F, 240)
+
         f = QFont()
-        f.setPointSizeF(17.0)
+        f.setPointSizeF(13.0)
         f.setWeight(QFont.DemiBold)
         f.setStyleStrategy(QFont.PreferAntialias)
         painter.setFont(f)
-        painter.setPen(QColor(80, 80, 100, 235))
-        painter.drawText(icon_rect, Qt.AlignCenter, icon_text)
+        painter.setPen(text_color)
+
+        # 给文字留出右侧角标空间
+        text_rect = QRectF(body_x + 2.0, body_y, body_w - 4.0, body_h)
+        painter.drawText(text_rect, Qt.AlignCenter, self.zone_name)
 
         painter.restore()
 
-        # 7. 角标（Apple 风极简：纯色 + 细白边，无多余阴影）
+        # === 角标：文件计数（Apple 蓝，不再用红色） ===
         if self.file_count > 0:
             badge_text = str(self.file_count) if self.file_count < 100 else "99+"
             if len(badge_text) == 1:
-                bw, bh = 17.0, 17.0
+                bw, bh = 16.0, 16.0
             elif len(badge_text) == 2:
-                bw, bh = 21.0, 17.0
+                bw, bh = 20.0, 16.0
             else:
-                bw, bh = 26.0, 17.0
-            bx = w - bw - 1.0
-            by = 2.0
+                bw, bh = 25.0, 16.0
+            # 角标放在右上角内侧
+            bx = w - bw - 5.0
+            by = 3.0
             badge_rect = QRectF(bx, by, bw, bh)
 
             painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor(255, 59, 48, 235))
+            # 按压状态下角标变白底蓝字以保持对比；否则 Apple 蓝底白字
+            if self._pressed:
+                painter.setBrush(QColor(255, 255, 255, 235))
+            else:
+                painter.setBrush(QColor(0x0A, 0x84, 0xFF, 235))
             painter.drawRoundedRect(badge_rect, bh / 2.0, bh / 2.0)
 
-            painter.setPen(QPen(QColor(255, 255, 255, 150), 0.7))
+            painter.setPen(QPen(QColor(255, 255, 255, 130), 0.7))
             painter.setBrush(Qt.NoBrush)
             painter.drawRoundedRect(badge_rect, bh / 2.0, bh / 2.0)
 
@@ -600,7 +578,10 @@ class ZoneFolderButton(QPushButton):
             bf.setWeight(QFont.Bold)
             bf.setStyleStrategy(QFont.PreferAntialias)
             painter.setFont(bf)
-            painter.setPen(QColor(255, 255, 255, 255))
+            if self._pressed:
+                painter.setPen(QColor(0x0A, 0x84, 0xFF, 255))
+            else:
+                painter.setPen(QColor(255, 255, 255, 255))
             painter.drawText(badge_rect, Qt.AlignCenter, badge_text)
 
     @staticmethod
@@ -653,12 +634,8 @@ class ZonePanel(QWidget):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
 
-        # 标题栏
+        # 标题栏（纯文字，无 emoji 图标）
         header = QHBoxLayout()
-        self.icon_label = QLabel("📁")
-        self.icon_label.setStyleSheet("font-size: 24px; background: transparent; border: none;")
-        header.addWidget(self.icon_label)
-
         self.title_label = QLabel("智能分类")
         self.title_label.setStyleSheet("font-size: 18px; font-weight: 700; color: #1D1D1F; background: transparent; border: none;")
         header.addWidget(self.title_label)
@@ -703,9 +680,9 @@ class ZonePanel(QWidget):
         self.file_list.itemDoubleClicked.connect(self._on_file_double_clicked)
         layout.addWidget(self.file_list, 1)
 
-        # 底部操作 - Apple 蓝按钮
+        # 底部操作 - Apple 蓝按钮（纯文字）
         footer = QHBoxLayout()
-        open_folder_btn = QPushButton("📂  打开文件夹")
+        open_folder_btn = QPushButton("打开文件夹")
         open_folder_btn.setFixedHeight(36)
         open_folder_btn.setCursor(Qt.PointingHandCursor)
         open_folder_btn.setStyleSheet("""
@@ -739,10 +716,10 @@ class ZonePanel(QWidget):
         self.current_zone = zone_name
 
         zone_config = self.engine.get_all_zones().get(zone_name, {})
-        color = zone_config.get('color', '#4A7FFF')
-        icon = zone_config.get('icon', '📁')
+        # Apple HIG：统一使用 Apple 蓝，不再使用 per-zone 颜色/emoji 图标
+        _color = zone_config.get('color', '#0A84FF')
+        _icon = zone_config.get('icon', '')
 
-        self.icon_label.setText(icon)
         self.title_label.setText(zone_name)
 
         # 加载文件列表
