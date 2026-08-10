@@ -16,8 +16,8 @@
 ### Dock 栏特写
 ![Dock 特写](./v1.0.10/screenshots_real/02_dock_closeup_000.png)
 
-### Dock + 目录树弹出
-![目录树](./v1.0.10/screenshots_real/03_dock_with_directory_tree_000.png)
+### Dock + 分类区域弹出（按需展开）
+![分类](./v1.0.10/screenshots_real/03_dock_with_categories_popover_000.png)
 
 ### 悬浮球 + 文件夹按钮状态
 ![悬浮球](./v1.0.10/screenshots_real/04_floating_ball_and_folder_states_000.png)

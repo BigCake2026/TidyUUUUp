@@ -20,6 +20,122 @@ from core.smart_engine import SmartRuleEngine
 # 极简风格：不使用 emoji 图标，不使用 per-zone 多色，统一中性灰阶
 
 
+class CategoriesPopover(QWidget):
+    """轻量白色 Popover：点击 Dock「分类」入口后展开，列出所有分类区域。
+    不在 Dock 中永久占位，需要时才出现。与 DirectoryTreePopup 共享同一设计系统。"""
+
+    zone_activated = pyqtSignal(str, QPoint)
+
+    def __init__(self, parent=None):
+        super().__init__(None)
+        self.setWindowFlags(
+            Qt.FramelessWindowHint |
+            Qt.Popup |
+            Qt.NoDropShadowWindowHint
+        )
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedWidth(220)
+        self._zones = []
+        self._setup_ui()
+
+    def _setup_ui(self):
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(6, 6, 6, 6)
+        outer.setSpacing(0)
+
+        self.container = QFrame()
+        self.container.setObjectName("PopoverContainer")
+        self.container.setStyleSheet("""
+            QFrame#PopoverContainer {
+                background: #FFFFFF;
+                border: 1px solid rgba(0,0,0,0.08);
+                border-radius: 10px;
+            }
+        """)
+        shadow = QGraphicsDropShadowEffect(self.container)
+        shadow.setBlurRadius(4)
+        shadow.setColor(QColor(0, 0, 0, 26))
+        shadow.setOffset(0, 0)
+        self.container.setGraphicsEffect(shadow)
+
+        inner = QVBoxLayout(self.container)
+        inner.setContentsMargins(0, 0, 0, 0)
+        inner.setSpacing(0)
+
+        title = QLabel("分类区域")
+        title.setStyleSheet(
+            "color: #1D1D1F; font-size: 13px; font-weight: 600;"
+            " background: transparent; border: none; padding: 12px 14px 8px 14px;"
+        )
+        inner.addWidget(title)
+
+        sep = QFrame()
+        sep.setFixedHeight(1)
+        sep.setStyleSheet("background: rgba(0,0,0,0.06); border: none;")
+        inner.addWidget(sep)
+
+        self.list_widget = QWidget()
+        self.list_layout = QVBoxLayout(self.list_widget)
+        self.list_layout.setContentsMargins(4, 6, 4, 6)
+        self.list_layout.setSpacing(0)
+        inner.addWidget(self.list_widget)
+        outer.addWidget(self.container)
+
+    def populate(self, zones):
+        """zones: dict[zone_name] -> config(dict with description/color/icon)"""
+        # 清除旧条目
+        while self.list_layout.count():
+            it = self.list_layout.takeAt(0)
+            w = it.widget()
+            if w:
+                w.deleteLater()
+        self._zones = []
+        for name, cfg in zones.items():
+            desc = cfg.get("description", "") if isinstance(cfg, dict) else ""
+            row = QPushButton()
+            row.setFixedHeight(38)
+            row.setCursor(Qt.PointingHandCursor)
+            row.setStyleSheet("""
+                QPushButton {
+                    text-align: left; padding: 0 10px;
+                    background: transparent; border: none; border-radius: 6px;
+                    color: #1D1D1F; font-size: 12px;
+                }
+                QPushButton:hover { background: rgba(0,0,0,0.04); }
+                QPushButton:pressed { background: rgba(0,0,0,0.07); }
+            """)
+            label_text = name if not desc else f"{name}\n{desc}"
+            row.setText(label_text)
+            row.setToolTip(desc)
+            row.clicked.connect(lambda _, n=name: self._on_zone(n))
+            self.list_layout.addWidget(row)
+            self._zones.append(name)
+
+    def _on_zone(self, zone_name):
+        # 以弹出框底部中心作为锚点交给上层（ZonePanel.show_zone 用）
+        gp = self.mapToGlobal(QPoint(self.width() // 2, 0))
+        self.zone_activated.emit(zone_name, gp)
+        self.hide()
+
+    def show_below(self, global_pos):
+        """显示在 global_pos（Dock 分类按钮的全局坐标）正上方"""
+        self.adjustSize()
+        w = self.width()
+        h = self.height()
+        x = global_pos.x() - w // 2
+        y = global_pos.y() - h - 8
+        screen = QApplication.primaryScreen().availableGeometry()
+        if x < screen.left() + 4:
+            x = screen.left() + 4
+        if x + w > screen.right() - 4:
+            x = screen.right() - w - 4
+        if y < screen.top() + 4:
+            y = global_pos.y() + 12
+        self.move(x, y)
+        self.show()
+        self.raise_()
+
+
 class DirectoryTreePopup(QWidget):
     """
     白色 popover 风格目录树弹出面板

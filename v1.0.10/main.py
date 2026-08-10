@@ -25,7 +25,7 @@ from ui.styles import apply_tidy_style
 from ui.dock_bar import DockBar
 from ui.main_window import MainWindow
 from ui.floating_ball import FloatingBall
-from ui.zone_panel import ZonePanel, ZoneFolderButton, DirectoryTreePopup
+from ui.zone_panel import ZonePanel, ZoneFolderButton, DirectoryTreePopup, CategoriesPopover
 from ui.undo_panel import UndoPanel
 from ui.quick_look import QuickLookPanel
 
@@ -117,6 +117,10 @@ class TidyUUUUpApp(QObject):
         # 悬停目录树弹出面板
         self._tree_popup = DirectoryTreePopup()
         self._tree_popup.file_activated.connect(self._on_tree_file_activated)
+
+        # 分类 Popover：点击 Dock「分类」入口后按需展开，列出所有分类区域
+        self._categories_popup = CategoriesPopover()
+        self._categories_popup.zone_activated.connect(self._on_category_activated)
         self._current_hovered_zone = None
 
         # 信号连接
@@ -124,6 +128,7 @@ class TidyUUUUpApp(QObject):
         self.dock.files_triggered.connect(self.main_window.show)
         self.dock.organizer_triggered.connect(self._show_organizer_tab)
         self.dock.undo_triggered.connect(self._show_undo_panel)
+        self.dock.categories_triggered.connect(self._show_categories_popover)
         self.main_window.show_dock.connect(self.dock._show_dock)
 
         # 系统托盘
@@ -301,10 +306,11 @@ class TidyUUUUpApp(QObject):
             btn.zone_hovered.connect(self._on_zone_hovered)
             btn.zone_left.connect(self._on_zone_left)
             self._zone_buttons.append(btn)
-            self.dock.apps_layout.addWidget(btn)
-            self.dock._all_items.append(btn)
+            # 不再直接放入 Dock：分类区域改为点击「分类」入口后通过
+            # CategoriesPopover 按需展开，避免 Dock 被所有区域永久占满。
+            # Dock 仅保留核心入口（Logo / 搜索 / 文件 / 整理 / 分类 / 添加 / 撤销 / 设置）。
 
-        self.dock._magnify.items = self.dock._all_items
+        # Dock 放大效果只作用于 Dock 自身的系统按钮，不再包含分类按钮
         QTimer.singleShot(3000, self._update_zone_file_counts)
 
     def _on_zone_hovered(self, btn, anchor_global):
@@ -322,6 +328,19 @@ class TidyUUUUpApp(QObject):
     def _on_zone_left(self):
         """鼠标离开 ZoneFolderButton → 启动延迟自动隐藏（鼠标进入 popup 时会被取消）"""
         self._tree_popup.restart_auto_hide(delay_ms=280)
+
+    def _show_categories_popover(self):
+        """点击 Dock「分类」入口 → 在该按钮上方展开分类区域 Popover"""
+        zones = self.smart_engine.get_all_zones()
+        self._categories_popup.populate(zones)
+        anchor = self.dock.categories_btn.mapToGlobal(
+            self.dock.categories_btn.rect().center()
+        )
+        self._categories_popup.show_below(anchor)
+
+    def _on_category_activated(self, zone_name, anchor_global):
+        """在分类 Popover 中选择了某个分类 → 打开该区域的面板"""
+        self.zone_panel.show_zone(zone_name, anchor_global)
 
     def _collect_zone_files(self, zone_name):
         """收集某个 zone 下的文件列表，用于目录树显示"""

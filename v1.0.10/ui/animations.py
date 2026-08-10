@@ -545,10 +545,36 @@ class DockMagnifyEffect:
         self._timer.timeout.connect(self._tick_all)
         self._factor = 0.20  # 苹果级灵敏度
 
+    def _is_alive(self, item):
+        """检查 item 是否仍然有效（未被 Qt 销毁/删除）"""
+        try:
+            item.isVisible()
+            return True
+        except (RuntimeError, ReferenceError):
+            return False
+
+    def _ensure_item(self, item):
+        """确保 item 在 current/target 两张表中都有记录，保持同步"""
+        if item not in self.current_scales:
+            self.current_scales[item] = 1.0
+        if item not in self.target_scales:
+            self.target_scales[item] = 1.0
+
     def update_magnification(self, mouse_pos):
+        # 先清理已被销毁的 stale item，避免对已删除对象操作
+        for item in list(self.target_scales.keys()):
+            if not self._is_alive(item):
+                self.target_scales.pop(item, None)
+                self.current_scales.pop(item, None)
+
         for item in self.items:
+            if not self._is_alive(item):
+                continue
             if not item.isVisible():
                 continue
+
+            # 同步：保证 current_scales 与 target_scales 都有该 item
+            self._ensure_item(item)
 
             item_center = item.mapTo(self.dock, item.rect().center())
             distance = abs(mouse_pos.x() - item_center.x())
@@ -570,8 +596,16 @@ class DockMagnifyEffect:
         """所有 item 共用一个 tick - 一次定时器触发处理所有 item"""
         all_converged = True
         for item in list(self.target_scales.keys()):
+            # 跳过已被销毁的 item 并清理
+            if not self._is_alive(item):
+                self.target_scales.pop(item, None)
+                self.current_scales.pop(item, None)
+                continue
             if not item.isVisible():
                 continue
+            # target/current 不同步时补齐，避免 KeyError
+            if item not in self.current_scales:
+                self.current_scales[item] = 1.0
             target = self.target_scales[item]
             current = self.current_scales[item]
             diff = target - current
