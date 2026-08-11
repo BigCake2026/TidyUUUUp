@@ -2,7 +2,30 @@
 
 > macOS 原生风格的桌面整理工具
 
-## 当前版本：v1.0.10
+## 当前版本：v1.0.11
+
+### 🏝️ v1.0.11 灵动岛 Dock（最新）
+
+基于 PyQt6 重构的 Apple Dynamic Island 风格底部悬浮 Dock。
+
+![Dock 默认状态](./v1.0.11/screenshots/01_dock_compact.png)
+![Dock 拉伸状态](./v1.0.11/screenshots/02_dock_stretched.png)
+![搜索激活状态](./v1.0.11/screenshots/03_dock_search_active.png)
+![文件夹 Popover](./v1.0.11/screenshots/04_folder_popover.png)
+![完整桌面](./v1.0.11/screenshots/05_full_desktop.png)
+![Dock + Popover](./v1.0.11/screenshots/06_dock_with_popover.png)
+
+核心特性：
+- Windows 10/11 原生 Acrylic 毛玻璃（DWM API）
+- Apple Spring Physics 弹簧伸缩动画（560 → 780px）
+- 矢量绘制 Apple 蓝文件夹图标（无 Emoji）
+- AI 虚拟目录映射 + 语义搜索 Popover
+
+详见 [v1.0.11/README.md](./v1.0.11/README.md)
+
+---
+
+### 🎨 v1.0.10 macOS 原生视觉设计系统
 
 重新建立完整的视觉设计系统，从「网页文件管理器 + Windows Dock + 彩色胶囊按钮」彻底改为「真正的 macOS 原生桌面工具」。
 

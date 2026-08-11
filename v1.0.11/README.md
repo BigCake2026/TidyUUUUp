@@ -4,7 +4,25 @@
 
 ## 截图预览
 
-> 本版本为单文件 Dock 原型，暂无运行截图。
+### Dock 默认 Compact 状态（1120×116 高清）
+![Dock 默认状态](./screenshots/01_dock_compact.png)
+
+### 搜索框聚焦 → 弹簧拉伸（560 → 780px）
+![Dock 拉伸状态](./screenshots/02_dock_stretched.png)
+
+### 搜索框输入文字 + 实时语义搜索
+![搜索激活状态](./screenshots/03_dock_search_active.png)
+
+### 文件夹 Popover 弹出面板（AI 虚拟目录内容）
+![文件夹 Popover](./screenshots/04_folder_popover.png)
+
+### 完整桌面合成视图
+![完整桌面](./screenshots/05_full_desktop.png)
+
+### Dock + Popover 组合视图
+![Dock + Popover](./screenshots/06_dock_with_popover.png)
+
+> 截图在 Linux offscreen 平台生成（Windows Acrylic 效果仅在 Windows 10/11 上生效，截图中为普通半透明背景）。
 
 ## 核心特性
 
