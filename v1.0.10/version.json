@@ -1,8 +1,8 @@
 {
-    "version": "1.0.10",
-    "publish_date": "2026-08-10",
-    "file_size": "35 MB",
-    "download_url": "https://github.com/BigCake2026/TidyUUUUpCode/releases/latest/download/TidyUUUUp_v1.0.10.zip",
-    "force_update": false,
-    "changelog": "🎨 v1.0.10 重新建立 macOS 原生视觉设计系统\n\n🚀 本次更新（2026-08-10）：\n\n【彻底重构视觉设计系统】\n从「网页文件管理器 + Windows Dock + 彩色胶囊按钮」彻底改为「真正的 macOS 原生桌面工具」。\n关键词：克制 · 留白 · 层次 · 安静\n\n【设计系统 (Design System)】\n- 色彩: Background #F5F5F7 / Window #FFFFFF / Text #1D1D1F / Secondary #86868B / Accent #007AFF\n- 圆角层级: 窗口 12px / 卡片 10px / 按钮 6px / Badge 4px\n- 字体: -apple-system, SF Pro Text, PingFang SC\n- 整体低饱和度，彩色仅用于文件类型/状态/极少数重要操作\n\n【移除的「廉价感」元素】\n- 移除大量胶囊形按钮\n- 移除明显的蓝色描边\n- 移除大面积渐变和强烈阴影\n- 移除大量彩色按钮\n- 移除「99+」巨大角标\n- 移除重度玻璃拟态效果\n\n【主窗口重设计】\n- 顶部栏 48px: 纯文字 Logo + Spotlight 风格搜索框 + 轻量扫描按钮\n- 左侧 Sidebar 180px: 纯文字分类项，选中项用淡背景高亮（非按钮样式）\n- 内容区: 白色背景 + 文字按钮视图切换 + 极简文件列表\n- Empty State: 文件夹轮廓图标 + 暂无文件 + 说明 + 开始扫描按钮\n\n【Dock 重设计】\n- 浮动式 44px 高度，半透明 rgba(255,255,255,0.72) 背景\n- 10px 圆角，1px 极淡边框，4 层柔和阴影\n- 文字按钮（搜索/文件/整理/分类/添加/设置）+ Apple Logo\n- 内容居中不塞满宽度，分隔线极淡\n\n【悬浮球极简化】\n- 40x40 极简灰色半透明圆球\n- 3 条水平线图标，移除彩虹光晕与呼吸动画\n- 保留拖动 + 左右边缘吸附\n\n【智能分类区域】\n- ZoneFolderButton 改为极简横向列表项 + 极小 badge\n- DirectoryTreePopup 改为白色 popover 风格\n\n【设计哲学】\n围绕「扫描 → 查看 → 整理」三个核心动作设计，其他功能全部弱化。\n少一点 UI，多一点空间。少一点装饰，多一点层次。\n少一点按钮，多一点内容。少一点颜色，多一点质感。"
+  "version": "1.0.10",
+  "publish_date": "2026-08-10",
+  "file_size": "35 MB",
+  "download_url": "https://github.com/BigCake2026/TidyUUUUpCode/releases/latest/download/TidyUUUUp_v1.0.10.zip",
+  "force_update": false,
+  "changelog": "🎨 v1.0.10 重新建立 macOS 原生视觉设计系统\n\n🚀 本次更新（2026-08-10）：\n\n【彻底重构视觉设计系统】\n从「网页文件管理器 + Windows Dock + 彩色胶囊按钮」彻底改为「真正的 macOS 原生桌面工具」。\n关键词：克制 · 留白 · 层次 · 安静\n\n【设计系统 (Design System)】\n- 色彩: Background #F5F5F7 / Window #FFFFFF / Text #1D1D1F / Secondary #86868B / Accent #007AFF\n- 圆角层级: 窗口 12px / 卡片 10px / 按钮 6px / Badge 4px\n- 字体: -apple-system, SF Pro Text, PingFang SC\n- 整体低饱和度，彩色仅用于文件类型/状态/极少数重要操作\n\n【移除的「廉价感」元素】\n- 移除大量胶囊形按钮\n- 移除明显的蓝色描边\n- 移除大面积渐变和强烈阴影\n- 移除大量彩色按钮\n- 移除「99+」巨大角标\n- 移除重度玻璃拟态效果\n\n【主窗口重设计】\n- 顶部栏 48px: 纯文字 Logo + Spotlight 风格搜索框 + 轻量扫描按钮\n- 左侧 Sidebar 180px: 纯文字分类项，选中项用淡背景高亮（非按钮样式）\n- 内容区: 白色背景 + 文字按钮视图切换 + 极简文件列表\n- Empty State: 文件夹轮廓图标 + 暂无文件 + 说明 + 开始扫描按钮\n\n【Dock 重设计】\n- 浮动式 44px 高度，半透明 rgba(255,255,255,0.72) 背景\n- 10px 圆角，1px 极淡边框，4 层柔和阴影\n- 文字按钮（搜索/文件/整理/分类/添加/设置）+ Apple Logo\n- 内容居中不塞满宽度，分隔线极淡\n\n【悬浮球极简化】\n- 40x40 极简灰色半透明圆球\n- 3 条水平线图标，移除彩虹光晕与呼吸动画\n- 保留拖动 + 左右边缘吸附\n\n【智能分类区域】\n- ZoneFolderButton 改为极简横向列表项 + 极小 badge\n- DirectoryTreePopup 改为白色 popover 风格\n\n【设计哲学】\n围绕「扫描 → 查看 → 整理」三个核心动作设计，其他功能全部弱化。\n少一点 UI，多一点空间。少一点装饰，多一点层次。\n少一点按钮，多一点内容。少一点颜色，多一点质感。\n\n【本次实际交付修正】\n- 分类区域不再永久占 Dock：工作区/娱乐/学习/图片/下载/临时等分类区域，改为点击 Dock「分类」入口后通过轻量白色 Popover（CategoriesPopover）按需展开，与 DirectoryTreePopup 共享同一设计系统。Dock 宽度因此收窄，仅保留核心入口。\n- 修复 Dock 悬停崩溃（DockMagnifyEffect KeyError）：鼠标悬停 Dock 图标不再闪退。\n- 以下截图均为真实运行截取（Linux + PyQt5 + Xvfb 1920×1080），非渲染预览图。"
 }
