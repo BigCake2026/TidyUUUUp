@@ -4,9 +4,9 @@
 
 ## 当前版本：v1.0.11
 
-### 🏝️ v1.0.11 灵动岛 Dock（最新）
+### 🏝️ v1.0.11 灵动岛 Dock（最新 · 可用性修复）
 
-基于 PyQt6 重构的 Apple Dynamic Island 风格底部悬浮 Dock。
+基于 PyQt6 重构的 Apple Dynamic Island 风格底部悬浮 Dock。本次更新让 UI 真正可用：真实扫描桌面文件、文件夹 Popover 展示真实文件、搜索框模糊匹配真实文件名、固定应用按钮可点击、无边框窗口可拖动、系统托盘 + 右键菜单。
 
 ![Dock 默认状态](./v1.0.11/screenshots/01_dock_compact.png)
 ![Dock 拉伸状态](./v1.0.11/screenshots/02_dock_stretched.png)

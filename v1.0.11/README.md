@@ -30,38 +30,53 @@
 - 底部悬浮式工具栏，半透明深色玻璃底板
 - Apple Spring Physics 弹簧伸缩动画
 - 搜索框聚焦时宽度从 560px 弹性拉伸到 780px
+- **可拖动**：按住空白区域拖动 Dock 位置
 
 ### 🪟 Windows 原生 Acrylic 毛玻璃
 - 通过 `ctypes` 调用 Windows `user32.SetWindowCompositionAttribute` API
 - 启用 `ACCENT_ENABLE_ACRYLICBLURBEHIND` (状态 4)
 - 深色模式背景色 `0xCC1E1E20`
+- 非 Windows 平台自动降级为 QPainter 半透明玻璃底板
 
 ### 📁 Apple 矢量蓝文件夹
 - 用 `QPainterPath` 矢量绘制，不使用 Emoji
 - 蓝色渐变主体（`#3399FF` → `#007AFF`）+ 后背板 tab
-- 点击弹出 AI 虚拟目录内容
+- hover 高光反馈
+- 点击弹出 **真实桌面文件** 的 AI 虚拟目录分类
 
-### 🔍 AI 虚拟目录 + 语义搜索
-- 物理桌面文件不移动，仅做语义分类映射
-- 搜索框实时显示匹配结果（带相似度百分比）
-- Popover 悬浮面板展示文件列表
+### 🔍 真实桌面扫描 + 模糊搜索
+- 启动时扫描用户桌面（`QStandardPaths` / SHGetKnownFolderPath，跨平台）
+- 按扩展名 + 关键词本地分类（无需联网 / AI）
+- 搜索框基于真实文件名做模糊匹配 + 相似度评分，实时显示结果
+- Popover 双击打开文件 / 右键在文件夹中显示 / 复制路径 / 移到回收站
 
 ### 🕐 常驻时钟
 - 右下角嵌入时间（`hh:mm A`）+ 日期（`MM/dd ddd`）
 - 每秒刷新
 
+### 📌 固定应用（真正可点击）
+- 🌐 浏览器：打开系统默认浏览器
+- 💻 终端：打开系统默认终端（Windows Terminal / Terminal.app / xterm 等）
+
+### 🧰 系统托盘 + 右键菜单
+- 托盘图标：显示 Dock / 重新扫描 / 关于 / 退出
+- Dock 右键菜单：重新扫描桌面 / 关于 / 退出
+- 每 15 秒自动重新扫描桌面
+
 ## 组件结构
 
 ```
 main.py
+├── DesktopIndex             # 真实桌面扫描 + 本地分类 + 模糊搜索
 ├── StackedLogoWidget        # Tidy / UUUUp 品牌堆叠 Logo
-├── AppleVectorFolderIcon    # 矢量蓝文件夹图标（可点击）
-├── TopPopoverPanel          # 悬浮毛玻璃弹出面板
+├── AppleVectorFolderIcon    # 矢量蓝文件夹图标（可点击 + hover）
+├── TopPopoverPanel          # 悬浮毛玻璃弹出面板（真实文件 + 右键菜单）
 └── TidyDynamicIslandDock    # 灵动岛主窗口
-    ├── Pinned Apps          # 固定应用（浏览器、终端）
-    ├── AI Virtual Folders   # 3 个虚拟目录文件夹
-    ├── Search Pill          # 药丸型搜索框
+    ├── Pinned Apps          # 固定应用（浏览器、终端，真正可点击）
+    ├── AI Virtual Folders   # 5 个虚拟目录文件夹（映射真实桌面文件）
+    ├── Search Pill          # 药丸型搜索框（真实模糊匹配）
     └── Clock                # 时钟日期
+└── 系统托盘 + 右键菜单       # 显示 / 重新扫描 / 关于 / 退出
 ```
 
 ## 运行

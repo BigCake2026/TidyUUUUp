@@ -82,8 +82,20 @@ def main():
     app.setStyle("Fusion")
 
     print("=== 创建 Dock ===")
-    dock = TidyDynamicIslandDock()
-    # offscreen 平台不需要真正 show，但调用 show 触发布局
+    # 用一个临时"桌面"目录填充演示文件，让截图展示真实分类/搜索结果
+    import tempfile
+    demo_dir = os.path.join(tempfile.gettempdir(), "tidyuuuup_demo_desktop")
+    os.makedirs(demo_dir, exist_ok=True)
+    for name in [
+        "Q3_Financial_Forecast.xlsx", "Tax_Invoice_2026.pdf", "Budget_Allocation.docx",
+        "VisionOS_Design_Tokens.fig", "AppIcon_Master_v2.png", "UI_Guidelines.pdf",
+        "tidyuuuup_dock.py", "native_bridge.cpp", "manifest.json",
+        "Holiday_Clip.mp4", "Podcast_Ep07.mp3", "Release_Archive.zip",
+        "meeting_notes.txt",
+    ]:
+        open(os.path.join(demo_dir, name), "w").close()
+
+    dock = TidyDynamicIslandDock(desktop_path=demo_dir)
     dock.show()
     QApplication.processEvents()
     time.sleep(0.5)
@@ -93,7 +105,7 @@ def main():
 
     print("\n=== 截图 2: 搜索框聚焦 → 弹簧拉伸 ===")
     dock.search_input.setFocus()
-    dock.on_search_focused()
+    dock.stretch()
     # 等待动画完成（直接设置最终宽度）
     dock.set_dock_width(dock.stretched_width)
     QApplication.processEvents()
@@ -101,8 +113,8 @@ def main():
     grab_widget(dock, "02_dock_stretched.png", scale=2)
 
     print("\n=== 截图 3: 搜索框输入文字 ===")
-    dock.search_input.setText("financial report")
-    dock.on_search_text_changed("financial report")
+    dock.search_input.setText("financial")
+    dock.on_search_text_changed("financial")
     QApplication.processEvents()
     time.sleep(0.3)
     grab_widget(dock, "03_dock_search_active.png", scale=2)
@@ -110,12 +122,15 @@ def main():
     print("\n=== 截图 4: 文件夹 Popover 弹出 ===")
     dock.search_input.clear()
     dock.search_input.clearFocus()
+    dock.collapse()
     dock.set_dock_width(dock.compact_width)
     QApplication.processEvents()
     time.sleep(0.2)
     # 模拟点击文件夹
-    global_pos = dock.mapToGlobal(dock.folder_fin.pos())
-    dock.popover.show_folder_content("Finance AI", global_pos)
+    global_pos = dock.mapToGlobal(dock.folders["Finance AI"].pos())
+    dock.popover.show_folder_content(
+        "Finance AI", global_pos,
+        dock.index.files_for_folder("Finance AI"))
     QApplication.processEvents()
     time.sleep(0.3)
     grab_widget(dock.popover, "04_folder_popover.png", scale=2)
@@ -124,7 +139,9 @@ def main():
     grab_full_desktop(dock, dock.popover, "05_full_desktop.png")
 
     print("\n=== 截图 6: Dock + Popover 合成 ===")
-    dock.popover.show_folder_content("Code Engine", global_pos)
+    dock.popover.show_folder_content(
+        "Code Engine", global_pos,
+        dock.index.files_for_folder("Code Engine"))
     QApplication.processEvents()
     time.sleep(0.3)
     grab_full_desktop(dock, dock.popover, "06_dock_with_popover.png")
