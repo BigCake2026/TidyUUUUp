@@ -1,0 +1,9 @@
+{
+    "version": "1.0.12",
+    "publish_date": "2026-08-14",
+    "file_size": "13 MB",
+    "download_url": "https://github.com/BigCake2026/TidyUUUUpCode/releases/latest/download/TidyUUUUp_v1.0.12.zip",
+    "force_update": false,
+    "changelog": "🏝️ v1.0.12 灵动岛 Dock — 更新检测 + 流畅度版\n\n【🆕 GitHub 自动更新检测】\n- 启动后台检测 GitHub 最新 Release（GET /releases/latest），语义化比较版本号\n- 自动识别任意高位版本：v1.0.12 / 1.1.0 / 2.0.0（自动去掉 v 前缀，支持预发布号）\n- 有更新时弹出深色玻璃风格更新对话框（changelog + 下载进度 + 跳过此版本 + 打开 Release 页面）\n- 托盘/右键菜单可随时「检查更新」\n- 自动检查 24 小时冷却，不打扰；支持「跳过此版本」\n\n【🔒 用户数据 100% 保留】\n- 用户设置保存在独立目录（Windows: %APPDATA%\\TidyUUUUp / macOS: ~/Library/Application Support/TidyUUUUp / Linux: ~/.local/share/TidyUUUUp）\n- 更新包仅下载到用户「下载」目录，绝不触碰用户数据目录\n- 桌面位置、更新偏好等跨版本保留\n\n【⚡ 流畅度提升】\n- 搜索框输入防抖 250ms：避免每次按键重建结果，大桌面更顺滑\n- 桌面扫描改为 mtime 变化检测 + 后台 QThread：仅当桌面变化才重算，UI 永不卡顿\n- 弹簧动画改用 OutQuint 曲线，更柔和顺滑\n- Popover 改为常驻 Tool 悬浮面板（不再被 ToolTip 自动隐藏机制误关，更稳定）\n- 文件列表按名排序，结果稳定可读\n\n【保留 v1.0.11 全部可用性】\n真实桌面扫描/分类/模糊搜索/双击打开/右键复制路径·移到回收站/固定应用可点击/窗口可拖动/系统托盘/跨平台 Acrylic 降级\n\n【新增模块】\n- settings.py: UserSettings（用户数据持久化，跨版本稳定路径）\n- updater.py: UpdateChecker（GitHub Release 检测 + semver）+ UpdateDownloader（下载到下载目录）\n- update_dialog.py: UpdateDialog（深色玻璃更新对话框）\n- DesktopScanWorker: 后台扫描线程"
+}
+
