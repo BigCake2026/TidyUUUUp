@@ -1,23 +1,28 @@
 """
-TidyUUUUp v1.0.11 - Dynamic Island Dock (Functional Edition)
+TidyUUUUp v1.0.12 - Dynamic Island Dock (Update + Fluidity Edition)
 灵动岛风格桌面整理 Dock，基于 PyQt6
 
-本版本相对原始展示版的核心改进（让 UI 真正可用）：
-  1. 真正扫描物理桌面文件（QStandardPaths），而非全部 mock 数据；
-     在 Windows 上自动识别桌面路径，其它平台回退到用户主目录下的
-     `Desktop`（无则创建空目录）。
-  2. 文件夹 Popover 展示真实桌面文件（按扩展名/关键词分类），
-     双击可直接在文件管理器中打开该文件（跨平台）。
-  3. 搜索框基于真实文件名做模糊匹配 + 相似度评分，实时显示结果。
-  4. 固定应用按钮真正可用（系统默认浏览器 / 默认终端打开）。
-  5. 修正聚焦逻辑：使用 FocusIn 事件触发弹簧拉伸，按 Esc / 点击空白
-     收起，避免原来 selectionChanged 误触发的问题。
-  6. 跨平台安全：Windows Acrylic API 优雅降级；非 Windows 平台用
-     QPainter 绘制半透明深色玻璃底板（功能不受影响）。
-  7. 提供 tray icon + 右键菜单（退出 / 重新扫描 / 关于），
-     无边框窗口可拖动，修复"无法移动窗口"的可用性问题。
-  8. 健壮性：clipboard 用安全降级、subprocess 用 Popen 避免阻塞、
-     全部异常捕获不使 UI 崩溃。
+v1.0.12 相对 v1.0.11 的核心改进：
+
+  【GitHub 自动更新检测】
+  1. 启动时后台检测 GitHub 最新 Release（GET /releases/latest），语义化比较版本号，
+     可识别 v1.0.12 / 1.1.0 / 2.0.0 等任意高位版本（自动去掉 "v" 前缀）。
+  2. 有更新时弹出深色玻璃风格更新对话框（含 changelog / 下载进度 / 跳过此版本）。
+  3. 用户数据 100% 保留：更新包仅下载到用户「下载」目录，设置文件保存在独立的
+     AppDataLocation 目录，更新流程绝不触碰用户数据。
+  4. 自动检查有 24 小时冷却（可在设置中调整），支持「跳过此版本」；托盘/右键菜单
+     可随时手动「检查更新」。
+
+  【流畅度提升】
+  5. 搜索框输入防抖（250ms）：避免每次按键都重建结果，大桌面下更顺滑。
+  6. 桌面扫描改为「mtime 变化检测 + 后台线程」：仅当桌面目录修改时间变化才重算索引，
+     且扫描在 QThread 中执行，UI 永不卡顿；扫描完成后通过信号回到主线程刷新。
+  7. 弹簧动画改用 OutQuint 曲线（更柔和顺滑），并启用动画防抖避免重复触发抖动。
+  8. Popover 文件列表按文件名排序，结果更稳定可读。
+
+  【保留 v1.0.11 全部可用性】
+  真实桌面扫描 / 分类 / 模糊搜索 / 双击打开 / 右键复制路径·移到回收站 /
+  固定应用可点击 / 窗口可拖动 / 系统托盘 / 跨平台 Acrylic 降级。
 """
 import os
 import sys
@@ -25,10 +30,16 @@ import re
 import subprocess
 import ctypes
 import platform
+import time
 from functools import partial
+
+# 确保能找到同目录下的 settings/updater/update_dialog 模块，
+# 无论从哪个工作目录启动 main.py 都能正确导入。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from PyQt6.QtCore import (Qt, QTimer, QTime, QDate, QPropertyAnimation,
                           QEasingCurve, QRect, QSize, pyqtSignal, pyqtProperty,
-                          QPoint, QStandardPaths, QEvent)
+                          QPoint, QStandardPaths, QEvent, QThread)
 from PyQt6.QtGui import (QPainter, QColor, QFont, QPen, QBrush,
                          QPainterPath, QLinearGradient, QAction, QIcon, QCursor,
                          QGuiApplication, QKeyEvent)
@@ -37,6 +48,10 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QHBoxLayout, QVBoxLayout,
                              QGraphicsDropShadowEffect, QListWidget,
                              QListWidgetItem, QMenu, QSystemTrayIcon,
                              QMessageBox)
+
+from settings import UserSettings
+from updater import UpdateChecker, UpdateDownloader, CURRENT_VERSION, is_newer
+from update_dialog import UpdateDialog
 
 try:
     from send2trash import send2trash  # 可选依赖：移到回收站
@@ -185,6 +200,7 @@ class DesktopIndex:
     def __init__(self, desktop_path: str):
         self.desktop_path = desktop_path
         self.files: list[dict] = []
+        self._last_mtime: float = 0.0
         self.scan()
 
     def _category_for(self, name: str) -> str:
@@ -194,8 +210,19 @@ class DesktopIndex:
                 return cat
         return "其他"
 
+    def directory_mtime(self) -> float:
+        try:
+            return os.stat(self.desktop_path).st_mtime
+        except Exception:
+            return 0.0
+
+    def has_changed(self) -> bool:
+        """桌面目录 mtime 是否较上次扫描有变化（用于跳过冗余重扫）。"""
+        return self.directory_mtime() != self._last_mtime
+
     def scan(self) -> None:
         self.files = []
+        self._last_mtime = self.directory_mtime()
         try:
             with os.scandir(self.desktop_path) as it:
                 for entry in it:
@@ -203,14 +230,20 @@ class DesktopIndex:
                         continue
                     if entry.name.lower() in self.SKIP_NAMES or entry.name.startswith("."):
                         continue
+                    try:
+                        size = entry.stat().st_size
+                    except OSError:
+                        size = 0
                     self.files.append({
                         "name": entry.name,
                         "path": entry.path,
                         "category": self._category_for(entry.name),
-                        "size": entry.stat().st_size,
+                        "size": size,
                     })
         except Exception as e:
             print(f"[Scan] {e}")
+        # 按文件名排序，保证展示稳定
+        self.files.sort(key=lambda f: f["name"].lower())
 
     def files_for_folder(self, folder_name: str) -> list[dict]:
         cats = self.VIRTUAL_FOLDERS.get(folder_name, [])
@@ -238,6 +271,26 @@ class DesktopIndex:
                 scored.append((max(score, 1), f))
         scored.sort(key=lambda x: x[0], reverse=True)
         return scored[:limit]
+
+
+# ==========================================
+# 后台扫描线程（流畅度：扫描不阻塞 UI）
+# ==========================================
+class DesktopScanWorker(QThread):
+    """在后台线程执行桌面扫描，完成后把新的 DesktopIndex 文件列表发回主线程。"""
+    scanned = pyqtSignal(list)   # 发回 files 列表（深拷贝安全）
+
+    def __init__(self, index: DesktopIndex, parent=None):
+        super().__init__(parent)
+        self._index = index
+
+    def run(self):
+        try:
+            self._index.scan()
+            self.scanned.emit(list(self._index.files))
+        except Exception as e:
+            print(f"[ScanWorker] {e}")
+            self.scanned.emit([])
 
 
 # ==========================================
@@ -358,10 +411,14 @@ class TopPopoverPanel(QWidget):
     file_activated = pyqtSignal(str)  # 双击/回车打开文件
 
     def __init__(self, parent=None):
-        super().__init__(parent, Qt.WindowType.ToolTip | Qt.WindowType.FramelessWindowHint)
+        # 用 Tool（非 ToolTip）+ StaysOnTop + 无边框：作为常驻悬浮面板，
+        # 不被 Qt 的 ToolTip 自动隐藏机制在事件循环中误关，真实使用更稳定。
+        super().__init__(parent, Qt.WindowType.Tool |
+                         Qt.WindowType.FramelessWindowHint |
+                         Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
         self.setFixedSize(360, 240)
-        self.setWindowFlag(Qt.WindowType.WindowDoesNotAcceptFocus, False)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -508,9 +565,12 @@ class TopPopoverPanel(QWidget):
 class TidyDynamicIslandDock(QWidget):
     request_rescan = pyqtSignal()
 
-    def __init__(self, desktop_path: str = None):
+    def __init__(self, desktop_path: str = None, settings: UserSettings = None):
         super().__init__()
-        self.desktop_path = desktop_path or get_desktop_path()
+        self.settings = settings or UserSettings()
+        # 允许用户在设置中自定义桌面路径
+        custom = self.settings.get("desktop_path") or ""
+        self.desktop_path = desktop_path or custom or get_desktop_path()
         self.index = DesktopIndex(self.desktop_path)
 
         self.compact_width = 560
@@ -525,19 +585,34 @@ class TidyDynamicIslandDock(QWidget):
 
         self._drag_offset: QPoint | None = None
 
+        # 流畅度：搜索防抖定时器
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.setInterval(250)
+        self._search_timer.timeout.connect(self._run_search)
+        self._pending_query = ""
+
+        # 流畅度：后台扫描线程（避免在 GUI 线程扫描大目录）
+        self._scan_worker: DesktopScanWorker | None = None
+
+        # 更新检测器（懒创建）
+        self._update_checker: UpdateChecker | None = None
+        self._force_check_pending = False
+
         self.setup_ui()
-        self.center_bottom_position()
+        self._restore_position()
 
         enable_windows_acrylic(int(self.winId()), dark=True)
 
-        self.spring_anim = QPropertyAnimation(self, b"dockWidth")
-        self.spring_anim.setDuration(450)
-        self.spring_anim.setEasingCurve(QEasingCurve.Type.OutBack)
+        # 流畅度：更柔和的动画曲线 + 防抖
+        self.spring_anim = QPropertyAnimation(self, b"dockWidth", self)
+        self.spring_anim.setDuration(420)
+        self.spring_anim.setEasingCurve(QEasingCurve.Type.OutQuint)
 
-        # 定时重新扫描桌面（每 15 秒，低成本）
+        # 桌面重扫：每 10 秒检测 mtime，仅在变化时才后台重扫（低成本）
         self._scan_timer = QTimer(self)
-        self._scan_timer.timeout.connect(self.rescan)
-        self._scan_timer.start(15000)
+        self._scan_timer.timeout.connect(self._maybe_rescan)
+        self._scan_timer.start(10000)
 
     # ---- dockWidth 属性（动画用） ----
     def get_dock_width(self):
@@ -680,11 +755,44 @@ class TidyDynamicIslandDock(QWidget):
         y = screen.height() - self.height_size - 24
         self.move(x, y)
 
-    # ---- 桌面重扫 ----
-    def rescan(self):
-        self.index.scan()
+    def _restore_position(self):
+        """恢复用户上次拖动后的位置（保留用户布局），无则居中底部。"""
+        pos = self.settings.get("dock_position")
+        if isinstance(pos, list) and len(pos) == 2:
+            try:
+                self.move(int(pos[0]), int(pos[1]))
+                return
+            except Exception:
+                pass
+        self.center_bottom_position()
 
-    # ---- 弹簧动画 ----
+    # ---- 桌面重扫（流畅度：mtime 检测 + 后台线程）----
+    def _maybe_rescan(self):
+        """定时回调：仅当桌面目录 mtime 变化时才触发后台重扫。"""
+        if not self.index.has_changed():
+            return
+        self.rescan()
+
+    def rescan(self):
+        """后台线程扫描桌面，完成后回到主线程（不阻塞 UI）。"""
+        if self._scan_worker is not None and self._scan_worker.isRunning():
+            return  # 已有扫描在进行，跳过
+        self._scan_worker = DesktopScanWorker(self.index, self)
+        self._scan_worker.scanned.connect(self._on_scan_done)
+        self._scan_worker.start()
+
+    def _on_scan_done(self, files):
+        """后台扫描完成回调（主线程）。files 已是 index.files 的拷贝。"""
+        # index 已在子线程内更新，这里仅触发可能的 UI 刷新
+        if self.popover.isVisible():
+            # 若 Popover 正在显示某文件夹，刷新其内容
+            title = self.popover.title_label.text()
+            for name in DesktopIndex.VIRTUAL_FOLDERS:
+                if name in title:
+                    self.open_folder_popover(name)
+                    return
+
+    # ---- 弹簧动画（流畅度：OutQuint + 防抖）----
     def trigger_spring_animation(self, target_width):
         if self.current_width == target_width:
             return
@@ -715,9 +823,17 @@ class TidyDynamicIslandDock(QWidget):
         return super().eventFilter(obj, event)
 
     def on_search_text_changed(self, text):
-        q = text.strip()
-        if not q:
+        """流畅度：搜索防抖 250ms，避免每次按键都重建结果。"""
+        self._pending_query = text.strip()
+        if not self._pending_query:
+            self._search_timer.stop()
             self.popover.hide()
+            return
+        self._search_timer.start()
+
+    def _run_search(self):
+        q = self._pending_query
+        if not q:
             return
         results = self.index.search(q)
         global_pos = self.mapToGlobal(self.search_input.pos())
@@ -753,24 +869,70 @@ class TidyDynamicIslandDock(QWidget):
             self.move(event.globalPosition().toPoint() - self._drag_offset)
 
     def mouseReleaseEvent(self, event):
+        if self._drag_offset is not None:
+            # 拖动结束：保存用户位置（保留用户布局）
+            self.settings.set("dock_position", [self.x(), self.y()])
         self._drag_offset = None
 
     def _show_context_menu(self, global_pos):
         menu = QMenu(self)
-        act_rescan = menu.addAction("🔄 重新扫描桌面")
+        act_check = menu.addAction("🔄 检查更新")
+        act_rescan = menu.addAction("🔁 重新扫描桌面")
         act_about = menu.addAction("ℹ️ 关于")
         menu.addSeparator()
         act_quit = menu.addAction("退出")
         chosen = menu.exec(global_pos)
-        if chosen == act_rescan:
+        if chosen == act_check:
+            self.check_for_updates(force=True)
+        elif chosen == act_rescan:
             self.rescan()
         elif chosen == act_about:
             QMessageBox.about(self, "关于 TidyUUUUp",
-                              "TidyUUUUp v1.0.11\n灵动岛风格桌面整理 Dock\n\n"
+                              f"TidyUUUUp v{CURRENT_VERSION}\n灵动岛风格桌面整理 Dock\n\n"
                               f"桌面目录：{self.desktop_path}\n"
-                              f"已索引文件：{len(self.index.files)} 个")
+                              f"已索引文件：{len(self.index.files)} 个\n"
+                              f"用户数据：{self.settings.path}")
         elif chosen == act_quit:
             QApplication.quit()
+
+    # ---- 更新检测 ----
+    def check_for_updates(self, force: bool = False):
+        """检查 GitHub 更新。force=True 忽略冷却与跳过设置（手动触发）。"""
+        if self._update_checker is not None and self._update_checker.isRunning():
+            return
+        if not force:
+            if not self.settings.should_auto_check():
+                return
+        self._force_check_pending = force
+        self._update_checker = UpdateChecker(
+            repo=self.settings.get("update_repo", "BigCake2026/TidyUUUUp"),
+            current_version=CURRENT_VERSION, parent=self)
+        self._update_checker.check_finished.connect(
+            lambda has, info: self._on_update_checked(has, info, force))
+        self._update_checker.check_error.connect(self._on_update_error)
+        self._update_checker.start()
+
+    def _on_update_checked(self, has_update: bool, info: dict, force: bool):
+        self.settings.mark_checked()
+        if not has_update:
+            if force:
+                QMessageBox.information(
+                    self, "检查更新",
+                    f"当前已是最新版本 v{info.get('current_version', CURRENT_VERSION)}。\n"
+                    f"GitHub 最新 Release：{info.get('latest_tag', '未知')}")
+            return
+        latest = info.get("latest_version", "")
+        # 自动检查时尊重「跳过此版本」
+        if not force and self.settings.is_skipped(latest):
+            return
+        dlg = UpdateDialog(info, self.settings, self)
+        dlg.show_centered()
+
+    def _on_update_error(self, msg: str):
+        # 静默处理自动检查的网络错误；手动检查时提示
+        if getattr(self, "_force_check_pending", False):
+            QMessageBox.warning(self, "检查更新", f"检查更新失败：{msg}")
+        self._force_check_pending = False
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -811,18 +973,21 @@ def install_tray(dock: TidyDynamicIslandDock) -> QSystemTrayIcon | None:
             p.end()
             icon = QIcon(pix)
         tray.setIcon(icon)
-        tray.setToolTip("TidyUUUUp Dock")
+        tray.setToolTip(f"TidyUUUUp v{CURRENT_VERSION}")
         menu = QMenu()
         a_show = menu.addAction("显示 Dock")
+        a_check = menu.addAction("🔄 检查更新")
         a_rescan = menu.addAction("重新扫描桌面")
         a_about = menu.addAction("关于")
         menu.addSeparator()
         a_quit = menu.addAction("退出")
         a_show.triggered.connect(dock.show)
+        a_check.triggered.connect(lambda: dock.check_for_updates(force=True))
         a_rescan.triggered.connect(dock.rescan)
         a_about.triggered.connect(lambda: QMessageBox.about(
             None, "关于 TidyUUUUp",
-            "TidyUUUUp v1.0.11\n灵动岛风格桌面整理 Dock"))
+            f"TidyUUUUp v{CURRENT_VERSION}\n灵动岛风格桌面整理 Dock\n"
+            f"用户数据：{dock.settings.path}"))
         a_quit.triggered.connect(QApplication.quit)
         tray.setContextMenu(menu)
         tray.show()
@@ -840,12 +1005,15 @@ def main():
     app.setStyle("Fusion")
     app.setApplicationName("TidyUUUUp")
 
-    dock = TidyDynamicIslandDock()
+    settings = UserSettings()
+    dock = TidyDynamicIslandDock(settings=settings)
     dock.show()
 
     tray = install_tray(dock)
 
-    # 托盘缺失时通过 dock 右键菜单仍可退出
+    # 启动后短暂延迟，后台检查 GitHub 更新（尊重冷却与跳过设置，不打扰）
+    QTimer.singleShot(2500, dock.check_for_updates)
+
     return app.exec()
 
 

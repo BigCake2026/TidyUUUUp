@@ -28,7 +28,7 @@ desktop.ini
 # Temp / generated
 *.log
 *.tmp
-screenshots/
+# Versioned screenshots are documentation assets and must remain tracked.
 *.bat
 *.sh
 download_server.py
@@ -38,6 +38,7 @@ record_demo.py
 _render_preview.py
 build_all_exe.sh
 build_v107_exe.sh
+release/
 record_demo.sh
 prepare_github_release.bat
 github_release_upload.bat
