@@ -1,130 +1,54 @@
 # TidyUUUUp
 
-> macOS 原生风格的桌面整理工具
+> **TidyUUUUp** 是面向 Windows 的轻量桌面整理工具。它在本地扫描桌面文件，提供分类浏览、搜索和文件操作，并以低干扰的悬浮小岛呈现最常用入口。
 
-## 当前版本：v1.0.12
+![TidyUUUUp v1.1.0 居中小岛预览](./v1.1.0/screenshots/v1.1.0_centered_island.png)
 
-### 🆕 v1.0.12 更新检测 + 流畅度版（最新）
+## 当前版本：v1.1.0
 
-在 v1.0.11 可用版基础上新增 **GitHub 自动更新检测**与多项**流畅度优化**，且完全保留用户数据：
+v1.1.0 将小岛收敛为一个**真正居中的主操作区**。默认界面只保留品牌标记、四个分类文件夹和搜索入口；时钟、重复分隔线、固定浏览器/终端按钮及模拟文案均被移除。较少使用的命令已转入右键菜单和系统托盘，因此界面更安静，功能仍可直接访问。
 
-- 🔄 **GitHub 更新检测**：启动后台检测 GitHub 最新 Release，语义化比较版本号，可识别 `v1.0.12` / `1.1.0` / `2.0.0` 等任意高位版本；弹出更新对话框（changelog + 下载进度 + 跳过此版本）；24h 冷却不打扰。
-- 🔒 **用户数据 100% 保留**：设置保存在独立目录，更新包仅下载到「下载」目录，绝不触碰用户数据；桌面位置/偏好跨版本保留。
-- ⚡ **流畅度**：搜索防抖 250ms、桌面扫描改用 mtime 检测 + 后台 QThread（UI 不卡顿）、弹簧动画改用 OutQuint 曲线、Popover 改为常驻悬浮面板。
+| 项目 | v1.1.0 行为 |
+| --- | --- |
+| 桌面整理 | 在本地按工作、图片、媒体和代码分类真实桌面文件，不移动、不上传文件。 |
+| 搜索与文件操作 | 支持文件名搜索、双击打开、在文件夹中显示、复制路径；安装 `send2trash` 时可显式移到回收站。 |
+| 小岛布局 | 小岛内的常驻内容由左右弹性空间包围，默认始终视觉居中；拖动后的自定义位置会被记住，可一键恢复居中。 |
+| 后台能力 | 保留后台扫描、目录变化检测、系统托盘、更新检查和用户设置持久化。 |
+| Windows 发布 | 自动构建单文件 `TidyUUUUp.exe`；EXE 首次启动会在桌面生成或刷新带应用图标的快捷方式。 |
 
-![Dock 默认状态](./v1.0.12/screenshots/01_dock_compact.png)
-![Dock 拉伸状态](./v1.0.12/screenshots/02_dock_stretched.png)
-![搜索激活状态](./v1.0.12/screenshots/03_dock_search_active.png)
-![文件夹 Popover](./v1.0.12/screenshots/04_folder_popover.png)
+## 下载与启动
 
-详见 [v1.0.12/README.md](./v1.0.12/README.md)
+发布完成后，请从 [GitHub Releases](https://github.com/BigCake2026/TidyUUUUp/releases) 下载 `TidyUUUUp_v1.1.0_Windows.zip`，解压后运行 `TidyUUUUp.exe`。程序第一次启动时会自动在当前用户桌面创建 `TidyUUUUp.lnk`，图标与 EXE 保持一致；压缩包中也附带 `create_shortcut.ps1`，可在需要时手动重建快捷方式。
 
----
+| 文件 | 用途 |
+| --- | --- |
+| `TidyUUUUp.exe` | 无需安装的 Windows 单文件应用。 |
+| `create_shortcut.ps1` | 快捷方式辅助脚本；通常由 EXE 首次启动自动调用。 |
+| `README.md` | 当前发布包的快速使用说明。 |
+| `*.sha256` | 发布压缩包的 SHA-256 完整性校验值。 |
 
-### 🏝️ v1.0.11 灵动岛 Dock（可用性修复）
+## 仓库结构与版本保留
 
-基于 PyQt6 重构的 Apple Dynamic Island 风格底部悬浮 Dock。本次更新让 UI 真正可用：真实扫描桌面文件、文件夹 Popover 展示真实文件、搜索框模糊匹配真实文件名、固定应用按钮可点击、无边框窗口可拖动、系统托盘 + 右键菜单。
+当前仓库采用“**新版本目录 + 历史版本快照**”策略。最新版本独立存放在 `v1.1.0/`；`v1.0.1` 至 `v1.0.12` 的目录、既有分支、标签与提交历史均保留，不重写、不删除。历史版本清单见 [VERSIONS.md](./VERSIONS.md)。
 
-![Dock 默认状态](./v1.0.11/screenshots/01_dock_compact.png)
-![Dock 拉伸状态](./v1.0.11/screenshots/02_dock_stretched.png)
-![搜索激活状态](./v1.0.11/screenshots/03_dock_search_active.png)
-![文件夹 Popover](./v1.0.11/screenshots/04_folder_popover.png)
-![完整桌面](./v1.0.11/screenshots/05_full_desktop.png)
-![Dock + Popover](./v1.0.11/screenshots/06_dock_with_popover.png)
+| 路径 | 说明 |
+| --- | --- |
+| [`v1.1.0/`](./v1.1.0/) | 当前稳定开发版本：居中小岛、真实本地索引、应用图标与自动快捷方式。 |
+| [`v1.0.1/` — `v1.0.12/`](./VERSIONS.md) | 原始历史版本快照，仅归档，不覆盖。 |
+| [`scripts/build_windows_release.py`](./scripts/build_windows_release.py) | Windows EXE、ZIP 与 SHA-256 的可重复构建入口。 |
+| [`.github/workflows/build-windows.yml`](./.github/workflows/build-windows.yml) | GitHub Actions Windows 构建与标签发布工作流。 |
 
-核心特性：
-- Windows 10/11 原生 Acrylic 毛玻璃（DWM API）
-- Apple Spring Physics 弹簧伸缩动画（560 → 780px）
-- 矢量绘制 Apple 蓝文件夹图标（无 Emoji）
-- AI 虚拟目录映射 + 语义搜索 Popover
+## 构建与发布
 
-详见 [v1.0.11/README.md](./v1.0.11/README.md)
+Windows 构建由 GitHub Actions 的 Windows 运行器完成，以避免在非 Windows 环境中伪造或交叉编译不可验证的 EXE。手动触发工作流时将得到可下载的构建产物；推送形如 `v1.1.0` 的标签时，工作流会同时创建 GitHub Release 并上传 ZIP 与校验文件。
 
----
+本地 Windows 构建可使用以下命令。构建产物位于 `dist/` 和 `release/`，这两个目录不会被提交到版本库。
 
-### 🎨 v1.0.10 macOS 原生视觉设计系统
+```powershell
+python -m pip install -r v1.1.0/requirements.txt pyinstaller
+python scripts/build_windows_release.py
+```
 
-重新建立完整的视觉设计系统，从「网页文件管理器 + Windows Dock + 彩色胶囊按钮」彻底改为「真正的 macOS 原生桌面工具」。
+## 隐私与安全边界
 
-关键词：克制 · 留白 · 层次 · 安静
-
-## 截图预览
-
-### 主界面 + Dock + 悬浮球
-![主界面](./v1.0.10/screenshots_real/01_main_window_with_dock_000.png)
-
-### Dock 栏特写
-![Dock 特写](./v1.0.10/screenshots_real/02_dock_closeup_000.png)
-
-### Dock + 分类区域弹出（按需展开）
-![分类](./v1.0.10/screenshots_real/03_dock_with_categories_popover_000.png)
-
-### 悬浮球 + 文件夹按钮状态
-![悬浮球](./v1.0.10/screenshots_real/04_floating_ball_and_folder_states_000.png)
-
-### 完整桌面视图
-![完整桌面](./v1.0.10/screenshots_real/05_full_app_desktop_000.png)
-
-## 设计系统
-
-### 色彩
-| 角色 | 色值 | 用途 |
-|---|---|---|
-| Background | `#F5F5F7` | 接近白的浅灰背景 |
-| Window | `#FFFFFF` | 纯白窗口 |
-| Primary Text | `#1D1D1F` | 深灰文字（非纯黑） |
-| Secondary | `#86868B` | 中灰次要文字 |
-| Tertiary | `#AEAEB2` | 浅灰辅助文字 |
-| Border | `rgba(0,0,0,0.06)` | 极淡边框 |
-| Accent | `#007AFF` | 系统蓝强调色 |
-
-### 圆角层级
-- 窗口：12px
-- 卡片：10px
-- 按钮：6px
-- Badge：4px
-
-### 字体
-`-apple-system, SF Pro Text, SF Pro Display, PingFang SC`
-
-## 核心改动
-
-### 主窗口
-- 顶部栏 48px：纯文字 Logo + Spotlight 风格搜索框 + 轻量扫描按钮
-- 左侧 Sidebar 180px：纯文字分类项，选中项用淡背景高亮
-- 内容区：白色背景 + 文字按钮视图切换 + 极简文件列表
-- Empty State：文件夹轮廓图标 + 暂无文件 + 说明 + 开始扫描
-
-### Dock
-- 浮动式 44px 高度，半透明背景
-- 10px 圆角，1px 极淡边框，4 层柔和阴影
-- 文字按钮：搜索 / 文件 / 整理 / 分类 / 添加 / 设置
-
-### 悬浮球
-- 40×40 极简灰色半透明圆球
-- 3 条水平线图标，移除彩虹光晕与呼吸动画
-- 保留拖动 + 左右边缘吸附
-
-## 下载
-
-- **EXE 发布包**：[Releases 页面](https://github.com/BigCake2026/TidyUUUUpCode/releases)
-- **源码**：[v1.0.10 目录](./v1.0.10/)
-
-## 自动打包
-
-本项目使用 GitHub Actions 在 Windows 环境自动打包 EXE。详见 [打包说明](./.github/workflows/build-windows-exe.yml)。
-
-手动触发：
-1. 打开 [Actions 页面](https://github.com/BigCake2026/TidyUUUUpCode/actions)
-2. 选择 **Build Windows EXE** workflow
-3. 点击 **Run workflow**，填写版本号 `v1.0.10`
-4. 等待构建完成后在 Releases 下载
-
-## 设计哲学
-
-围绕「扫描 → 查看 → 整理」三个核心动作设计，其他功能全部弱化。
-
-少一点 UI，多一点空间。
-少一点装饰，多一点层次。
-少一点按钮，多一点内容。
-少一点颜色，多一点质感。
+文件索引与分类逻辑完全在本地运行。程序不会自动移动、重命名、上传或删除任何桌面文件；“移到回收站”仅会在用户从文件右键菜单明确选择后执行。更新检查仅访问公开的 GitHub Release 接口。
