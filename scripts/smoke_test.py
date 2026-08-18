@@ -13,7 +13,7 @@ from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "v1.1.0"))
+sys.path.insert(0, str(ROOT / "v1.1.1"))
 
 from PyQt6.QtWidgets import QApplication
 from main import DesktopIndex, TidyDynamicIslandDock
@@ -51,10 +51,10 @@ def main() -> None:
         dock.close()
         settings.set("desktop_path", "")
 
-    assert CURRENT_VERSION == "1.1.0"
-    assert is_newer("1.1.1", "1.1.0")
-    assert not is_newer("1.0.12", "1.1.0")
-    print("TidyUUUUp v1.1.0 smoke tests passed")
+    assert CURRENT_VERSION == "1.1.1"
+    assert is_newer("1.1.2", "1.1.1")
+    assert not is_newer("1.1.0", "1.1.1")
+    print("TidyUUUUp v1.1.1 smoke tests passed")
 
 
 if __name__ == "__main__":

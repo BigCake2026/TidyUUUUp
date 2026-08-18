@@ -1,0 +1,8 @@
+{
+  "version": "1.1.1",
+  "publish_date": "2026-08-18",
+  "file_size": "由 Windows 构建流程生成",
+  "download_url": "https://github.com/BigCake2026/TidyUUUUp/releases/latest",
+  "force_update": false,
+  "changelog": "v1.1.1 Brand Icon and Screenshot Edition\n\n【正式品牌图标】\n- 使用 Tidy UUUUp 正式品牌图标生成多尺寸 Windows ICO\n- EXE、系统托盘和首次启动生成的桌面快捷方式使用相同品牌资产\n\n【截图集】\n- 新增默认居中、搜索聚焦、工作分类和本地搜索结果四种运行截图\n- 截图使用真实临时桌面文件索引生成，展示实际功能流而非模拟英文数据\n\n【保留 v1.1.0 功能】\n- 居中小岛、本地分类、搜索、打开文件、右键操作、后台扫描、托盘和更新检测均保持不变\n- 不自动移动、重命名、上传或删除用户文件\n\n【版本保留】\n- v1.0.1 至 v1.1.0 的目录、分支、标签和历史提交均不修改"
+}

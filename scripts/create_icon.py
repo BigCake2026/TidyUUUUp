@@ -7,8 +7,8 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "v1.1.0" / "assets" / "tidyuuuup_app_icon.png"
-DESTINATION = ROOT / "v1.1.0" / "assets" / "tidyuuuup_app_icon.ico"
+SOURCE = ROOT / "v1.1.1" / "assets" / "tidyuuuup_app_icon.png"
+DESTINATION = ROOT / "v1.1.1" / "assets" / "tidyuuuup_app_icon.ico"
 SIZES = (16, 20, 24, 32, 40, 48, 64, 128, 256)
 
 

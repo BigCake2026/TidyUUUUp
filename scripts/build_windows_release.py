@@ -17,7 +17,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 APP_DIR = ROOT / f"v{VERSION}"
 ASSETS = APP_DIR / "assets"
 BUILD_DIR = ROOT / "build"
