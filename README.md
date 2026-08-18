@@ -36,13 +36,10 @@ v1.1.0 将小岛收敛为一个**真正居中的主操作区**。默认界面只
 | [`v1.1.0/`](./v1.1.0/) | 当前稳定开发版本：居中小岛、真实本地索引、应用图标与自动快捷方式。 |
 | [`v1.0.1/` — `v1.0.12/`](./VERSIONS.md) | 原始历史版本快照，仅归档，不覆盖。 |
 | [`scripts/build_windows_release.py`](./scripts/build_windows_release.py) | Windows EXE、ZIP 与 SHA-256 的可重复构建入口。 |
-| [`.github/workflows/build-windows.yml`](./.github/workflows/build-windows.yml) | GitHub Actions Windows 构建与标签发布工作流。 |
 
 ## 构建与发布
 
-Windows 构建由 GitHub Actions 的 Windows 运行器完成，以避免在非 Windows 环境中伪造或交叉编译不可验证的 EXE。手动触发工作流时将得到可下载的构建产物；推送形如 `v1.1.0` 的标签时，工作流会同时创建 GitHub Release 并上传 ZIP 与校验文件。
-
-本地 Windows 构建可使用以下命令。构建产物位于 `dist/` 和 `release/`，这两个目录不会被提交到版本库。
+Windows EXE 必须在 Windows 环境构建，以避免在非 Windows 环境中伪造或交叉编译不可验证的二进制文件。仓库提供可重复执行的构建脚本；构建产物位于 `dist/` 和 `release/`，这两个目录不会被提交到版本库。
 
 ```powershell
 python -m pip install -r v1.1.0/requirements.txt pyinstaller

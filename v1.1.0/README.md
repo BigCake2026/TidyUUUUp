@@ -37,7 +37,7 @@ python -m pip install -r requirements.txt pyinstaller
 python ..\scripts\build_windows_release.py
 ```
 
-构建脚本将生成 `dist/TidyUUUUp.exe`、`release/TidyUUUUp_v1.1.0_Windows.zip` 和对应的 SHA-256 文件。可通过 GitHub Actions 的 **Build Windows release** 工作流在 Windows 云端运行相同构建。
+构建脚本将生成 `dist/TidyUUUUp.exe`、`release/TidyUUUUp_v1.1.0_Windows.zip` 和对应的 SHA-256 文件。请在 Windows 环境执行该脚本，以获得可验证的 Windows 二进制文件。
 
 ## 目录说明
 
