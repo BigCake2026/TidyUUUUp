@@ -29,7 +29,7 @@ class UpdateDialog(QDialog):
 
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedSize(540, 500)
+        self.setFixedSize(540, 450)
 
         self._build_ui()
 
@@ -118,14 +118,7 @@ class UpdateDialog(QDialog):
         btns = QHBoxLayout()
         btns.setSpacing(12)
 
-        self.skip_btn = QPushButton("跳过此版本")
-        self.skip_btn.setFixedHeight(42)
-        self.skip_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.skip_btn.setStyleSheet(self._ghost_btn_css())
-        self.skip_btn.clicked.connect(self._skip)
-        btns.addWidget(self.skip_btn)
-
-        self.later_btn = QPushButton("稍后提醒")
+        self.later_btn = QPushButton("稍后安装")
         self.later_btn.setFixedHeight(42)
         self.later_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.later_btn.setStyleSheet(self._ghost_btn_css())
@@ -166,12 +159,6 @@ class UpdateDialog(QDialog):
         """
 
     # ---------- 行为 ----------
-    def _skip(self):
-        self.settings.set("skip_version", self.update_info.get("latest_version", ""))
-        self.status.setText("已跳过此版本，下次启动不再提醒（可在设置中恢复）。")
-        self.status.show()
-        QTimer.singleShot(1200, self.reject)
-
     def _start_download(self):
         url = self.update_info.get("download_url", "")
         if not url:
@@ -180,14 +167,13 @@ class UpdateDialog(QDialog):
             return
         self.action_btn.setEnabled(False)
         self.action_btn.setText("下载中...")
-        self.skip_btn.setEnabled(False)
         self.later_btn.setEnabled(False)
         self.progress.show()
         self.status.show()
         self._set_status("正在下载更新包...")
 
         self.downloader = UpdateDownloader(
-            url, self.update_info.get("asset_name", "tidyuuuup_update.zip"), self)
+            url, self.update_info.get("asset_name", "TidyUUUUp_Update.exe"), self)
         self.downloader.progress.connect(self._on_progress)
         self.downloader.download_finished.connect(self._on_finished)
         self.downloader.start()
@@ -200,24 +186,42 @@ class UpdateDialog(QDialog):
         if not ok:
             self.action_btn.setEnabled(True)
             self.action_btn.setText("重试下载")
-            self.skip_btn.setEnabled(True)
             self.later_btn.setEnabled(True)
             self._set_status(f"❌ 下载失败：{result}")
             return
         self.progress.setValue(100)
         dest = result
-        # 打开下载所在文件夹，方便用户安装
         self._reveal_path(dest)
         self._finished = True
-        self._set_status(f"✅ 已下载到：{dest}\n请解压并替换程序目录（你的设置与桌面索引会自动保留）。")
-        self.action_btn.setText("打开 Release 页面")
         self.action_btn.setEnabled(True)
         self.action_btn.clicked.disconnect()
-        self.action_btn.clicked.connect(self._open_release_page)
-        self.skip_btn.hide()
-        self.later_btn.setText("完成")
-        self.later_btn.clicked.disconnect()
-        self.later_btn.clicked.connect(self.accept)
+        if dest.lower().endswith(".exe"):
+            self._set_status(
+                f"✅ 安装程序已下载到：{dest}\n"
+                "点击“安装更新”即可更新应用；用户设置、桌面索引路径与小岛位置会保留。"
+            )
+            self.action_btn.setText("安装更新")
+            self.action_btn.clicked.connect(lambda: self._launch_installer(dest))
+            self.later_btn.setText("稍后安装")
+        else:
+            self._set_status(f"✅ 已下载到：{dest}\n请在下载目录手动安装；用户设置与桌面索引会保留。")
+            self.action_btn.setText("打开 Release 页面")
+            self.action_btn.clicked.connect(self._open_release_page)
+            self.later_btn.setText("完成")
+            self.later_btn.clicked.disconnect()
+            self.later_btn.clicked.connect(self.accept)
+
+    def _launch_installer(self, installer_path):
+        try:
+            if sys.platform.startswith("win"):
+                os.startfile(installer_path)  # type: ignore[attr-defined]
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", installer_path])
+            else:
+                subprocess.Popen(["xdg-open", os.path.dirname(installer_path)])
+            self.accept()
+        except Exception as error:
+            self._set_status(f"无法启动安装程序：{error}")
 
     def _set_status(self, text):
         self.status.setText(text)

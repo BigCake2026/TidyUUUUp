@@ -60,6 +60,22 @@ def is_newer(latest: str, current: str) -> bool:
         return False
 
 
+def select_release_asset(assets: list[dict]) -> tuple[str, str]:
+    """Prefer a Windows Setup EXE; retain ZIP compatibility for old releases."""
+    candidates = [(str(asset.get("name", "")), str(asset.get("browser_download_url", ""))) for asset in assets]
+    for name, url in candidates:
+        lowered = name.lower()
+        if lowered.endswith(".exe") and ("setup" in lowered or "install" in lowered):
+            return url, name
+    for name, url in candidates:
+        if name.lower().endswith(".exe"):
+            return url, name
+    for name, url in candidates:
+        if name.lower().endswith(".zip"):
+            return url, name
+    return "", ""
+
+
 # ==========================================
 # 更新检测线程
 # ==========================================
@@ -109,20 +125,11 @@ class UpdateChecker(QThread):
         if not tag:
             return None
 
-        # 优先选取 zip 资源，其次源码 zipball，最后 release html_url
-        download_url = ""
-        asset_name = ""
-        for asset in data.get("assets", []) or []:
-            name = asset.get("name", "")
-            if name.lower().endswith(".zip"):
-                download_url = asset.get("browser_download_url", "")
-                asset_name = name
-                break
-        if not download_url:
-            download_url = data.get("zipball_url", "")
-            asset_name = "source.zip"
+        # 优先选取单文件 Windows 安装程序；旧 ZIP 仅作为历史版本兼容回退。
+        download_url, asset_name = select_release_asset(data.get("assets", []) or [])
         if not download_url:
             download_url = data.get("html_url", "")
+            asset_name = ""
 
         return {
             "latest_version": tag.lstrip("vV"),

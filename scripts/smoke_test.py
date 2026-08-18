@@ -18,7 +18,8 @@ sys.path.insert(0, str(ROOT / "v1.1.2"))
 from PyQt6.QtWidgets import QApplication
 from main import DesktopIndex, TidyDynamicIslandDock
 from settings import UserSettings
-from updater import CURRENT_VERSION, is_newer
+from update_dialog import UpdateDialog
+from updater import CURRENT_VERSION, is_newer, select_release_asset
 
 
 def main() -> None:
@@ -49,6 +50,24 @@ def main() -> None:
         dock.run_search()
         assert dock.popover.title.text() == "Search · main"
         assert dock.popover.items.count() == 1
+
+        # The user cannot disable or skip release checking in v1.1.2.
+        assert settings.should_auto_check() is True
+        assert settings.is_skipped("999.0.0") is False
+        installer_url, installer_name = select_release_asset([
+            {"name": "source.zip", "browser_download_url": "https://example.invalid/source.zip"},
+            {"name": "TidyUUUUp_Setup_v1.1.3.exe", "browser_download_url": "https://example.invalid/setup.exe"},
+            {"name": "TidyUUUUp.exe", "browser_download_url": "https://example.invalid/app.exe"},
+        ])
+        assert installer_name == "TidyUUUUp_Setup_v1.1.3.exe"
+        assert installer_url.endswith("setup.exe")
+        dialog = UpdateDialog({
+            "current_version": "1.1.2", "latest_version": "1.1.3", "asset_name": installer_name,
+            "download_url": installer_url, "release_url": "https://example.invalid/release", "changelog": "Test update",
+        }, settings)
+        assert not hasattr(dialog, "skip_btn")
+        assert dialog.action_btn.text() == "立即下载更新"
+        dialog.close()
         dock.close()
         settings.set("desktop_path", "")
 

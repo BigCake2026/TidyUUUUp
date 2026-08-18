@@ -628,8 +628,7 @@ class TidyDynamicIslandDock(QWidget):
     def check_for_updates(self, force: bool = False) -> None:
         if self.update_checker is not None and self.update_checker.isRunning():
             return
-        if not force and not self.settings.should_auto_check():
-            return
+        # 更新检查为产品必备能力：每次启动均检查 GitHub Release。
         self.manual_update_check = force
         self.update_checker = UpdateChecker(self.settings.get("update_repo", "BigCake2026/TidyUUUUp"), CURRENT_VERSION, self)
         self.update_checker.check_finished.connect(lambda available, info: self.on_update_checked(available, info, force))
@@ -641,9 +640,6 @@ class TidyDynamicIslandDock(QWidget):
         if not available:
             if force:
                 QMessageBox.information(self, "检查更新", f"当前已是最新版本 v{CURRENT_VERSION}。")
-            return
-        version = info.get("latest_version", "")
-        if not force and self.settings.is_skipped(version):
             return
         dialog = UpdateDialog(info, self.settings, self)
         dialog.show_centered()

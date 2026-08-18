@@ -4,5 +4,5 @@
   "file_size": "由 Windows 安装程序构建流程生成",
   "download_url": "https://github.com/BigCake2026/TidyUUUUp/releases/latest",
   "force_update": false,
-  "changelog": "v1.1.2 Classic UI and One-Click Installer Edition\n\n【经典小岛界面】\n- 恢复改版前的双行 Tidy / UUUUp 标识、固定控制、三枚蓝色文件夹、搜索框和内置时钟布局\n- 保留经典深色 Acrylic 玻璃风格、底部位置与搜索伸缩动画\n\n【真实本地功能】\n- 文件夹、全部文件、搜索、双击打开、在文件夹中显示、复制路径和可选回收站操作继续作用于真实本地桌面文件\n- 保留后台索引、变化检测、拖动位置记忆、托盘菜单和更新检查\n- 不自动移动、重命名、上传或删除用户文件\n\n【一键安装】\n- 发布单个 TidyUUUUp_Setup_v1.1.2.exe 安装程序，双击后即可安装\n- 安装程序写入正式品牌图标、开始菜单入口和桌面快捷方式\n\n【版本保留】\n- v1.0.1 至 v1.1.1 的目录、分支、标签和历史提交均不修改"
+  "changelog": "v1.1.2 Classic UI and One-Click Installer Edition\n\n【经典小岛界面】\n- 恢复改版前的双行 Tidy / UUUUp 标识、固定控制、三枚蓝色文件夹、搜索框和内置时钟布局\n- 保留经典深色 Acrylic 玻璃风格、底部位置与搜索伸缩动画\n\n【真实本地功能】\n- 文件夹、全部文件、搜索、双击打开、在文件夹中显示、复制路径和可选回收站操作继续作用于真实本地桌面文件\n- 保留后台索引、变化检测、拖动位置记忆、托盘菜单和更新检查\n- 不自动移动、重命名、上传或删除用户文件\n\n【一键安装】\n- 发布单个 TidyUUUUp_Setup_v1.1.2.exe 安装程序，双击后即可安装\n- 安装程序写入正式品牌图标、开始菜单入口和桌面快捷方式\n\n【强制更新与数据保留】\n- 每次启动都会检查公开 GitHub Release，用户不能关闭更新检查或跳过某个版本\n- 优先下载 Setup EXE；用户确认安装后仅替换应用目录，不触碰 %APPDATA% 下的设置和本地索引路径\n\n【版本保留】\n- v1.0.1 至 v1.1.1 的目录、分支、标签和历史提交均不修改"
 }
