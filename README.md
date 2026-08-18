@@ -1,48 +1,44 @@
 # TidyUUUUp
 
-> **TidyUUUUp** 是面向 Windows 的轻量桌面整理工具。它在本地扫描桌面文件，提供分类浏览、搜索和文件操作，并以低干扰的悬浮小岛呈现最常用入口。
+> **TidyUUUUp** 是面向 Windows 的轻量桌面整理工具。它在本地扫描桌面文件，提供分类浏览、搜索和文件操作，并以悬浮小岛呈现最常用入口。
 
-![TidyUUUUp v1.1.1 居中小岛预览](./v1.1.1/screenshots/01_centered_compact.png)
+![TidyUUUUp v1.1.2 经典小岛预览](./v1.1.2/screenshots/01_classic_compact.png)
 
-## 当前版本：v1.1.1
+## 当前版本：v1.1.2
 
-v1.1.1 延续正式品牌图标和截图集，并将小岛收敛为一个**真正居中的主操作区**。默认界面只保留品牌标记、四个分类文件夹和搜索入口；时钟、重复分隔线、固定浏览器/终端按钮及模拟文案均被移除。较少使用的命令已转入右键菜单和系统托盘，因此界面更安静，功能仍可直接访问。
+v1.1.2 恢复了改版前的**经典小岛界面**：双行 `Tidy / UUUUp` 标识、两个固定控制、三枚蓝色文件夹、搜索框和右侧时间日期重新回到默认布局。真实桌面索引、搜索、文件打开、托盘、更新检查和拖动位置记忆继续保留。
 
-| 项目 | v1.1.1 行为 |
+| 项目 | v1.1.2 行为 |
 | --- | --- |
-| 桌面整理 | 在本地按工作、图片、媒体和代码分类真实桌面文件，不移动、不上传文件。 |
+| 文件分类 | 在本地按工作、图片、媒体和代码分类真实桌面文件，不移动、不上传文件。 |
 | 搜索与文件操作 | 支持文件名搜索、双击打开、在文件夹中显示、复制路径；安装 `send2trash` 时可显式移到回收站。 |
-| 小岛布局 | 小岛内的常驻内容由左右弹性空间包围，默认始终视觉居中；拖动后的自定义位置会被记住，可一键恢复居中。 |
+| 小岛布局 | 恢复经典横向构成，并保留底部定位与搜索聚焦时的弹性展开。 |
+| Windows 安装 | 发布一个 `TidyUUUUp_Setup_v1.1.2.exe`，双击即可安装，并自动创建带品牌图标的桌面与开始菜单快捷方式。 |
 | 后台能力 | 保留后台扫描、目录变化检测、系统托盘、更新检查和用户设置持久化。 |
-| Windows 发布 | 自动构建单文件 `TidyUUUUp.exe`；EXE 首次启动会在桌面生成或刷新带应用图标的快捷方式。 |
 
-## 下载与启动
+## 下载与安装
 
-发布完成后，请从 [GitHub Releases](https://github.com/BigCake2026/TidyUUUUp/releases) 下载 `TidyUUUUp_v1.1.1_Windows.zip`，解压后运行 `TidyUUUUp.exe`。程序第一次启动时会自动在当前用户桌面创建 `TidyUUUUp.lnk`，图标与 EXE 保持一致；压缩包中也附带 `create_shortcut.ps1`，可在需要时手动重建快捷方式。
+请从 [GitHub Releases](https://github.com/BigCake2026/TidyUUUUp/releases) 下载单个 `TidyUUUUp_Setup_v1.1.2.exe` 文件并双击。安装程序会将应用安装至当前用户的本地应用目录，自动创建 **桌面快捷方式** 和 **开始菜单入口**，安装完成后可直接启动应用。无需解压 ZIP 或执行 PowerShell。
 
-| 文件 | 用途 |
-| --- | --- |
-| `TidyUUUUp.exe` | 无需安装的 Windows 单文件应用。 |
-| `create_shortcut.ps1` | 快捷方式辅助脚本；通常由 EXE 首次启动自动调用。 |
-| `README.md` | 当前发布包的快速使用说明。 |
-| `*.sha256` | 发布压缩包的 SHA-256 完整性校验值。 |
+随 Release 提供的 `*.sha256` 文件用于校验安装程序完整性。应用也保留首次启动时的快捷方式修复逻辑，以避免安装路径变化后出现失效入口。
 
 ## 仓库结构与版本保留
 
-当前仓库采用“**新版本目录 + 历史版本快照**”策略。最新版本独立存放在 `v1.1.1/`；`v1.0.1` 至 `v1.1.0` 的目录、既有分支、标签与提交历史均保留，不重写、不删除。历史版本清单见 [VERSIONS.md](./VERSIONS.md)。
+当前仓库采用“**新版本目录 + 历史版本快照**”策略。最新版本独立存放在 `v1.1.2/`；`v1.0.1` 至 `v1.1.1` 的目录、既有分支、标签与提交历史均保留，不重写、不删除。完整清单见 [VERSIONS.md](./VERSIONS.md)。
 
 | 路径 | 说明 |
 | --- | --- |
-| [`v1.1.1/`](./v1.1.1/) | 当前稳定开发版本：正式品牌图标、居中小岛、真实本地索引与自动快捷方式。 |
-| [`v1.0.1/` — `v1.1.0/`](./VERSIONS.md) | 原始历史版本快照，仅归档，不覆盖。 |
-| [`scripts/build_windows_release.py`](./scripts/build_windows_release.py) | Windows EXE、ZIP 与 SHA-256 的可重复构建入口。 |
+| [`v1.1.2/`](./v1.1.2/) | 当前经典界面安装版：正式图标、真实本地索引、自动快捷方式和单文件安装程序。 |
+| [`v1.0.1/` — `v1.1.1/`](./VERSIONS.md) | 历史版本快照，仅归档，不覆盖。 |
+| [`scripts/build_windows_release.py`](./scripts/build_windows_release.py) | Windows 应用 EXE、单文件安装程序和 SHA-256 的可重复构建入口。 |
 
 ## 构建与发布
 
-Windows EXE 必须在 Windows 环境构建，以避免在非 Windows 环境中伪造或交叉编译不可验证的二进制文件。仓库提供可重复执行的构建脚本；构建产物位于 `dist/` 和 `release/`，这两个目录不会被提交到版本库。
+Windows 安装程序必须在 Windows 环境构建。仓库的自动构建流程会安装应用依赖和 Inno Setup，生成单个安装程序并发布到对应 GitHub Release。
 
 ```powershell
-python -m pip install -r v1.1.1/requirements.txt pyinstaller
+python -m pip install -r v1.1.2/requirements.txt pyinstaller
+choco install innosetup --yes
 python scripts/build_windows_release.py
 ```
 

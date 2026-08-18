@@ -1,11 +1,11 @@
-"""Build the TidyUUUUp Windows release.
+"""Build the TidyUUUUp v1.1.2 Windows application and one-click installer.
 
-Run this on Windows after installing the dependencies:
+Run only on Windows after PyInstaller and Inno Setup have been installed:
     python scripts/build_windows_release.py
 
-The script packages v1.1.0 into a single EXE, copies the shortcut helper and
-release notes, then creates a ZIP plus a SHA-256 checksum.  It never modifies
-historical version directories.
+The output release contains one user-facing setup executable plus its SHA-256
+file.  The installer writes the app to the current user's local app directory
+and creates branded desktop and Start menu shortcuts.
 """
 from __future__ import annotations
 
@@ -13,21 +13,21 @@ import hashlib
 import shutil
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 APP_DIR = ROOT / f"v{VERSION}"
 ASSETS = APP_DIR / "assets"
 BUILD_DIR = ROOT / "build"
 DIST_DIR = ROOT / "dist"
 RELEASE_DIR = ROOT / "release"
 APP_NAME = "TidyUUUUp"
+INSTALLER_NAME = f"{APP_NAME}_Setup_v{VERSION}.exe"
 
 
-def run(command: list[str]) -> None:
-    subprocess.run(command, cwd=APP_DIR, check=True)
+def run(command: list[str], cwd: Path = APP_DIR) -> None:
+    subprocess.run(command, cwd=cwd, check=True)
 
 
 def sha256(path: Path) -> str:
@@ -38,50 +38,56 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def find_inno_compiler() -> str:
+    for candidate in ("iscc", "ISCC.exe"):
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    raise RuntimeError(
+        "Inno Setup compiler was not found. Install Inno Setup 6 or run the GitHub Actions Windows workflow."
+    )
+
+
 def main() -> None:
     if not sys.platform.startswith("win"):
-        raise SystemExit("Windows EXE builds must run on Windows. Use the GitHub Actions workflow from Linux/macOS.")
+        raise SystemExit("Windows installer builds must run on Windows. Use the GitHub Actions workflow from Linux/macOS.")
     icon = ASSETS / "tidyuuuup_app_icon.ico"
+    installer_script = APP_DIR / "installer.iss"
     if not icon.is_file():
         raise FileNotFoundError(f"Missing application icon: {icon}")
+    if not installer_script.is_file():
+        raise FileNotFoundError(f"Missing installer script: {installer_script}")
 
     for directory in (BUILD_DIR, DIST_DIR, RELEASE_DIR):
         shutil.rmtree(directory, ignore_errors=True)
+    RELEASE_DIR.mkdir(parents=True, exist_ok=True)
 
-    separator = ";"
     run([
         sys.executable, "-m", "PyInstaller",
         "--noconfirm", "--clean", "--onefile", "--noconsole",
         "--name", APP_NAME,
         "--icon", str(icon),
-        "--add-data", f"{icon}{separator}assets",
-        "--add-data", f"{APP_DIR / 'create_shortcut.ps1'}{separator}.",
+        "--add-data", f"{icon};assets",
+        "--add-data", f"{APP_DIR / 'create_shortcut.ps1'};.",
         "--distpath", str(DIST_DIR),
         "--workpath", str(BUILD_DIR / "work"),
         "--specpath", str(BUILD_DIR / "spec"),
         str(APP_DIR / "main.py"),
     ])
 
-    executable = DIST_DIR / f"{APP_NAME}.exe"
-    if not executable.is_file():
-        raise RuntimeError(f"Expected EXE was not created: {executable}")
+    portable_exe = DIST_DIR / f"{APP_NAME}.exe"
+    if not portable_exe.is_file():
+        raise RuntimeError(f"Expected application EXE was not created: {portable_exe}")
 
-    package = RELEASE_DIR / f"{APP_NAME}_v{VERSION}"
-    package.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(executable, package / executable.name)
-    shutil.copy2(APP_DIR / "create_shortcut.ps1", package / "create_shortcut.ps1")
-    shutil.copy2(APP_DIR / "README.md", package / "README.md")
+    run([find_inno_compiler(), str(installer_script)], cwd=APP_DIR)
+    installer = RELEASE_DIR / INSTALLER_NAME
+    if not installer.is_file():
+        raise RuntimeError(f"Expected installer was not created: {installer}")
 
-    archive = RELEASE_DIR / f"{APP_NAME}_v{VERSION}_Windows.zip"
-    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-        for file in sorted(package.rglob("*")):
-            if file.is_file():
-                bundle.write(file, file.relative_to(RELEASE_DIR))
-
-    checksum = RELEASE_DIR / f"{archive.name}.sha256"
-    checksum.write_text(f"{sha256(archive)}  {archive.name}\n", encoding="utf-8")
-    print(f"Built: {executable}")
-    print(f"Release package: {archive}")
+    checksum = RELEASE_DIR / f"{installer.name}.sha256"
+    checksum.write_text(f"{sha256(installer)}  {installer.name}\n", encoding="utf-8")
+    print(f"Built portable application: {portable_exe}")
+    print(f"Built one-click installer: {installer}")
     print(f"Checksum: {checksum}")
 
 
