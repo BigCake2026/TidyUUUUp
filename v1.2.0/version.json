@@ -1,0 +1,8 @@
+{
+  "version": "1.2.0",
+  "publish_date": "2026-08-29",
+  "file_size": "由 Windows 安装程序构建流程生成",
+  "download_url": "https://github.com/BigCake2026/TidyUUUUp/releases/latest",
+  "force_update": false,
+  "changelog": "v1.2.0 Liquid Glass Edition\n\n【Liquid Glass 全新 UI】\n- 主小岛采用苹果 Liquid Glass 设计语言：半透明亚克力基底（alpha 降至 119）、垂直深度渐变、顶部镜面高光、折射边缘边框、底部内阴影\n- 弹出面板同步升级为 Liquid Glass 材质：更通透的背景、顶部高光、双层边框\n- 文件夹图标重绘为玻璃质感：蓝色渐变 + 顶部高光 + 折射边缘，悬停时更亮\n- 搜索框和固定按钮改为玻璃质感：更透明的背景、聚焦时蓝色光晕边框\n- 所有文字颜色微调为半透明白色，融入玻璃材质\n\n【功能完全保留】\n- v1.1.2 全部功能不变：桌面文件本地索引、四分类浏览、搜索、双击打开、在文件夹中显示、复制路径、可选回收站\n- 后台扫描、变化检测、拖动位置记忆、托盘菜单、更新检查全部保留\n- 不自动移动、重命名、上传或删除用户文件\n\n【安装与更新】\n- 安装流程与 v1.1.2 一致，双击 Setup EXE 即可安装\n- 仅替换应用目录，不触碰 %APPDATA% 下的设置和本地索引"
+}

@@ -1,4 +1,4 @@
-"""Build the TidyUUUUp v1.1.2 Windows application and one-click installer.
+"""Build the TidyUUUUp v2.0.0 Windows application and one-click installer.
 
 Run only on Windows after PyInstaller and Inno Setup have been installed:
     python scripts/build_windows_release.py
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "1.1.2"
+VERSION = "2.0.0"
 APP_DIR = ROOT / f"v{VERSION}"
 ASSETS = APP_DIR / "assets"
 BUILD_DIR = ROOT / "build"
