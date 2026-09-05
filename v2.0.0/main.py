@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from PyQt6.QtCore import QDate, QEvent, QPoint, QPropertyAnimation, QRectF, QStandardPaths, QThread, QTime, QTimer, Qt, QEasingCurve, pyqtProperty, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QFont, QIcon, QLinearGradient, QPainter, QPainterPath, QPen, QPixmap, QBrush
-from PyQt6.QtWidgets import QApplication, QFrame, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu, QMessageBox, QPushButton, QSystemTrayIcon, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QFrame, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu, QMessageBox, QPushButton, QStyle, QSystemTrayIcon, QVBoxLayout, QWidget
 
 from settings import UserSettings
 from update_dialog import UpdateDialog
@@ -185,7 +185,7 @@ class StackedLogoWidget(QWidget):
 
 
 class AppleVectorFolderIcon(QWidget):
-    """Classic blue folder glyph connected to a real Desktop category."""
+    """Native Windows folder icon connected to a real Desktop category."""
 
     clicked = pyqtSignal(str)
 
@@ -195,6 +195,7 @@ class AppleVectorFolderIcon(QWidget):
         self.setFixedSize(36, 36)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setToolTip(tooltip)
+        self._folder_icon = QApplication.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon)
 
     def enterEvent(self, event) -> None:
         self.hovered = True
@@ -209,32 +210,17 @@ class AppleVectorFolderIcon(QWidget):
             self.clicked.emit(self.group)
 
     def paintEvent(self, event) -> None:
+        from PyQt6.QtCore import QRect
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         if self.hovered:
             hover_path = QPainterPath()
             hover_path.addRoundedRect(0, 0, 36, 36, 11, 11)
             painter.fillPath(hover_path, QColor(255, 255, 255, 30))
-        # Glass folder body with depth
-        body = QPainterPath()
-        body.addRoundedRect(4, 11, 28, 19, 6, 6)
-        grad = QLinearGradient(0, 11, 0, 30)
-        grad.setColorAt(0.0, QColor(64, 168, 255, 235))
-        grad.setColorAt(0.5, QColor(20, 132, 255, 240))
-        grad.setColorAt(1.0, QColor(0, 110, 230, 245))
-        painter.fillPath(body, QBrush(grad))
-        # Folder tab
-        tab = QPainterPath()
-        tab.addRoundedRect(5, 6, 13, 8, 3, 3)
-        painter.fillPath(tab, QColor(30, 140, 255, 240))
-        # Glass top highlight
-        top_highlight = QLinearGradient(0, 11, 0, 19)
-        top_highlight.setColorAt(0.0, QColor(255, 255, 255, 70))
-        top_highlight.setColorAt(1.0, QColor(255, 255, 255, 0))
-        painter.fillPath(body, QBrush(top_highlight))
-        # Refractive edge
-        painter.setPen(QPen(QColor(255, 255, 255, 90 if self.hovered else 55), 1.1))
-        painter.drawPath(body)
+        icon_size = 26
+        x = (36 - icon_size) // 2
+        y = (36 - icon_size) // 2
+        self._folder_icon.paint(painter, QRect(x, y, icon_size, icon_size))
 
 
 class FilePopover(QWidget):
